@@ -42,5 +42,5 @@ html output at the same position in the page as in the source .rst file.
 For each tag, a new rst file is created in ``tags/<tagname>.rst`` containing a
 table of contents of each file associated with that tag.
 
-A "Tag Overview" page is also created that can be added to the index and show
+A :ref:`tagoverview` page is also created that can be added to the index and show
 all tags defined for this documentation set.
