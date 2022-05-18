@@ -43,3 +43,7 @@ sphinx-build docs docs/_build/html
 
 All contributors and maintainers are expected to follow the
 [PSF Code of Conduct](https://github.com/psf/community-code-of-conduct).
+
+## Notes
+
+This is loosely based on [this StackOverflow answer](https://stackoverflow.com/questions/18146107/how-to-add-blog-style-tags-in-restructuredtext-with-sphinx).
