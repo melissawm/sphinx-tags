@@ -5,11 +5,12 @@ import os
 from docutils.parsers.rst import Directive
 from docutils import nodes
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 # TAGLINK is used to generate the link from within each narrative page
 TAGLINK = "tags/%s.html"
 TAGSTART = ".. tags::"
+
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     ROOTDIR = "."
@@ -152,6 +153,8 @@ def setup(app):
     app.add_directive("tags", TagLinks)
     # directives.register_directive("tags", TagLinks)
     tags, pages = assign_entries()
+    if not os.path.exists(os.path.join(ROOTDIR, "tags")):
+        os.mkdir(os.path.join(ROOTDIR, "tags"))
     for tag in tags.values():
         tag.create_file([item for item in pages if tag.name in item.tags])
     tagpage(tags)
