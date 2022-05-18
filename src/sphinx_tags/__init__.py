@@ -10,7 +10,11 @@ __version__ = "0.0.1"
 # TAGLINK is used to generate the link from within each narrative page
 TAGLINK = "tags/%s.html"
 TAGSTART = ".. tags::"
-ROOTDIR = "./docs"
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    ROOTDIR = "."
+else:
+    ROOTDIR = "docs"
 
 class TagLinks(Directive):
     """Custom directive for adding tags to Sphinx-generated files.
