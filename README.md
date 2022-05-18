@@ -18,7 +18,7 @@ conda install -c conda-forge sphinx-tags
 
 ## Usage
 
-Refer to the documentation for usage instructions.
+Refer to the [documentation](https://sphinx-tags.readthedocs.io/en/latest/) for usage instructions.
 
 ## Contributing
 
