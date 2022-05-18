@@ -5,7 +5,7 @@ The ``sphinx-tags`` package enables the use of blog-style tags with Sphinx.
 
 .. tags:: documentation, installation
 
-Tags are created using the custom directive ``.. tags::``, with the tag titles
+Tags are created using the custom directive ``.. tags::`` with the tag titles
 as arguments.
 
 Installation
@@ -13,13 +13,19 @@ Installation
 
 Use pip or conda to install ``sphinx-tags``:
 
-.. code-block::
+.. tabs::
 
-   pip install sphinx-tags
+   .. tab:: pip
 
-.. code-block::
+      .. code-block::
 
-   conda install -c conda-forge sphinx-tags
+         pip install sphinx-tags
+
+   .. tab:: conda
+
+      .. code-block::
+
+         conda install -c conda-forge sphinx-tags
 
 Usage
 -----

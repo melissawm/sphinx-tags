@@ -33,6 +33,7 @@ release = '0.0.1'
 # ones.
 extensions = [
     "sphinx_tags",
+    "sphinx_tabs.tabs",
 ]
 
 tags_include_tags = True
@@ -52,6 +53,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'pydata_sphinx_theme'
+
+remove_from_toctrees = ["docs/tags/*"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
