@@ -23,6 +23,8 @@ Use pip or conda to install ``sphinx-tags``:
 
    .. tab:: conda
 
+      .. note:: This is not yet available.
+
       .. code-block::
 
          conda install -c conda-forge sphinx-tags

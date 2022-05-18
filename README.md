@@ -10,12 +10,6 @@ After activating a virtual environment manager such as `venv` or `conda`, use
 pip install sphinx-tags
 ```
 
-or
-
-```
-conda install -c conda-forge sphinx-tags
-```
-
 ## Usage
 
 Refer to the [documentation](https://sphinx-tags.readthedocs.io/en/latest/) for usage instructions.
