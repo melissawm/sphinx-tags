@@ -1,5 +1,5 @@
-quickstart
-##########
+installation
+############
 
 .. toctree::
     :maxdepth: 1

@@ -111,6 +111,10 @@ def tagpage(tags):
     """
     content = []
     title = "Tag overview"
+    content.append(":orphan:")
+    content.append("")
+    content.append(".. _tagoverview:")
+    content.append("")
     content.append(title)
     content.append("#" * len(title))
     content.append("")

@@ -13,12 +13,12 @@ Welcome to sphinx-tags's documentation!
    quickstart
    examples
    tests
-   tags/index
 
 
 Indices and tables
 ==================
 
+* :ref:`tagoverview`
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
