@@ -147,14 +147,27 @@ def assign_entries():
             pages.append(entry)
     return tags, pages
 
+def update_tags(app, config):
+    if config.tags_create_tags:
+        tags, pages = assign_entries()
+        if not os.path.exists(os.path.join(ROOTDIR, "tags")):
+            os.mkdir(os.path.join(ROOTDIR, "tags"))
+        for tag in tags.values():
+            tag.create_file([item for item in pages if tag.name in item.tags])
+        tagpage(tags)
+    else:
+        print("Tags were not created (tags_create_tags=False)")
+
 
 def setup(app):
     """Setup for Sphinx."""
-    app.add_directive("tags", TagLinks)
+    app.add_config_value('tags_create_tags', False, 'env')
     # directives.register_directive("tags", TagLinks)
-    tags, pages = assign_entries()
-    if not os.path.exists(os.path.join(ROOTDIR, "tags")):
-        os.mkdir(os.path.join(ROOTDIR, "tags"))
-    for tag in tags.values():
-        tag.create_file([item for item in pages if tag.name in item.tags])
-    tagpage(tags)
+    app.add_directive("tags", TagLinks)
+    app.connect("config-inited", update_tags)
+
+    return {
+        'version': __version__,
+        'parallel_read_safe': True,
+        'parallel_write_safe': True,
+    }

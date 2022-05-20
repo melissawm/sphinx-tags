@@ -36,7 +36,7 @@ extensions = [
     "sphinx_tabs.tabs",
 ]
 
-tags_include_tags = True
+tags_create_tags = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
