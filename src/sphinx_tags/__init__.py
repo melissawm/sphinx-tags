@@ -54,10 +54,10 @@ class TagLinks(Directive):
 class Tag:
     """A tag contains entries"""
 
-    def __init__(self, name):
+    def __init__(self, name, path):
         self.name = name
         self.items = []
-        self.filename = os.path.join(ROOTDIR, f"tags/{self.name}.rst")
+        self.filename = os.path.join(path, f"{self.name}.rst")
 
     def create_file(self, items):
         """Create rst file with list of documents associated with a given tag.
@@ -100,15 +100,15 @@ class Entry:
             self.tags = tagline.split(",")
             self.tags = [tag.strip() for tag in self.tags]
 
-    def assign_to_tags(self, tag_dict):
+    def assign_to_tags(self, tag_dict, path):
         """Append ourself to tags"""
         for tag in self.tags:
             if tag not in tag_dict:
-                tag_dict[tag] = Tag(tag)
+                tag_dict[tag] = Tag(tag, path)
             tag_dict[tag].items.append(self)
 
 
-def tagpage(tags):
+def tagpage(tags, path):
     """Creates Tag overview page.
 
     This page contains a list of all available tags.
@@ -130,38 +130,41 @@ def tagpage(tags):
     for tag in tags:
         content.append(f"    {tag.name} <{tag.name}.rst>")
     content.append("")
-    filename = os.path.join(ROOTDIR, "tags/index.rst")
+    filename = os.path.join(path, "index.rst")
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
 
 
-def assign_entries():
+def assign_entries(path):
     """Assign all found entries to their tag."""
     pages = []
     tags = {}
     for entryname in os.listdir(ROOTDIR):
         if entryname.endswith(".rst"):
-            path = os.path.join(ROOTDIR, entryname)
-            entry = Entry(path)
-            entry.assign_to_tags(tags)
+            entry = Entry(os.path.join(ROOTDIR, entryname))
+            entry.assign_to_tags(tags, path)
             pages.append(entry)
     return tags, pages
 
+
 def update_tags(app, config):
     if config.tags_create_tags:
-        tags, pages = assign_entries()
-        if not os.path.exists(os.path.join(ROOTDIR, "tags")):
-            os.mkdir(os.path.join(ROOTDIR, "tags"))
+        path = os.path.join(ROOTDIR, config.tags_output_dir, "tags")
+        tags, pages = assign_entries(path)
+        if not os.path.exists(path):
+            os.mkdir(path)
         for tag in tags.values():
             tag.create_file([item for item in pages if tag.name in item.tags])
-        tagpage(tags)
+        tagpage(tags, path)
     else:
         print("Tags were not created (tags_create_tags=False)")
 
 
 def setup(app):
     """Setup for Sphinx."""
-    app.add_config_value('tags_create_tags', False, 'env')
+    app.add_config_value('tags_create_tags', False, 'html')
+    app.add_config_value('tags_output_dir', ".", "html")
+
     # directives.register_directive("tags", TagLinks)
     app.add_directive("tags", TagLinks)
     app.connect("config-inited", update_tags)
