@@ -7,7 +7,7 @@ A tiny Sphinx extension that implements blog-style tags for documentation.
 After activating a virtual environment manager such as `venv` or `conda`, use
 
 ```
-pip install sphinx-tags
+python -m pip install sphinx-tags
 ```
 
 ## Usage
