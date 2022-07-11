@@ -40,4 +40,4 @@ All contributors and maintainers are expected to follow the
 
 ## Notes
 
-This is loosely based on [this StackOverflow answer](https://stackoverflow.com/questions/18146107/how-to-add-blog-style-tags-in-restructuredtext-with-sphinx).
+This project is loosely based on [this StackOverflow answer](https://stackoverflow.com/questions/18146107/how-to-add-blog-style-tags-in-restructuredtext-with-sphinx).

@@ -37,7 +37,7 @@ extensions = [
 ]
 
 tags_create_tags = True
-tags_output_dir = "."  #default
+#tags_output_dir = "_tags"  # default
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -54,8 +54,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'pydata_sphinx_theme'
-
-remove_from_toctrees = ["docs/tags/*"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

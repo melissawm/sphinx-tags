@@ -3,7 +3,7 @@ Quickstart
 
 The ``sphinx-tags`` package enables the use of blog-style tags with Sphinx.
 
-.. tags:: documentation, installation
+.. tags:: tagdocumentation, taginstallation
 
 Tags are created using the custom directive ``.. tags::`` with the tag titles
 as arguments.
@@ -34,7 +34,7 @@ Usage
 
 To assign one or more tags to a page in the documentation, use
 
-.. code-block::
+.. code-block:: rst
 
    .. tags:: tag1, tag2
 
