@@ -32,6 +32,8 @@ jobs:
       - run:
           name: Build docs
           command: |
+            python -m venv venv
+            . venv/bin/activate
             python -m pip install ".[sphinx]"
             cd docs; make html
 
