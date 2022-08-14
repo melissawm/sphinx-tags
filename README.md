@@ -1,4 +1,4 @@
-# sphinx-tags [![CircleCI](https://circleci.com/gh/circleci/circleci-docs.svg?style=svg)](https://circleci.com/gh/circleci/circleci-docs)
+# sphinx-tags [![sphinx-tags](https://circleci.com/gh/melissawm/sphinx-tags.svg?style=svg)](https://circleci.com/gh/melissawm/sphinx-tags)
 
 A tiny Sphinx extension that implements blog-style tags for documentation.
 
