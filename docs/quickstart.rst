@@ -13,15 +13,15 @@ Installation
 
 Use pip or conda to install ``sphinx-tags``:
 
-.. tabs::
+.. tab-set::
 
-   .. tab:: pip
+    .. tab-item:: pip
 
       .. code-block::
 
          pip install sphinx-tags
 
-   .. tab:: conda
+    .. tab-item:: conda
 
       .. note:: This is not yet available.
 
@@ -41,8 +41,9 @@ To assign one or more tags to a page in the documentation, use
 Tags must be separated by commas, and the tags will be shown in the rendered
 html output at the same position in the page as in the source .rst file.
 
-For each tag, a new rst file is created in ``tags/<tagname>.rst`` containing a
-table of contents of each file associated with that tag.
+For each tag, a new rst file is created in ``<output_dir>/<tagname>.rst``
+containing a table of contents of each file associated with that tag (see
+:ref:`config`).
 
-A :ref:`tagoverview` page is also created that can be added to the index and show
-all tags defined for this documentation set.
+A :ref:`tagoverview` page is also created that can be added to the index and
+show all tags defined for this documentation set.

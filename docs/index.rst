@@ -14,6 +14,7 @@ Welcome to sphinx-tags's documentation!
    configuration
    examples
    tests
+   release
 
 
 Indices and tables

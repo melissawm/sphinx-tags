@@ -23,7 +23,7 @@ copyright = '2022, melissawm'
 author = 'melissawm'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.2dev'
 
 
 # -- General configuration ---------------------------------------------------
@@ -33,7 +33,7 @@ release = '0.0.1'
 # ones.
 extensions = [
     "sphinx_tags",
-    "sphinx_tabs.tabs",
+    "sphinx_design",
 ]
 
 tags_create_tags = True

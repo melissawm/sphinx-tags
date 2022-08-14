@@ -22,7 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 sphinx = [
     "pydata-sphinx-theme",
-    "sphinx-tabs",
+    "sphinx-design",
 ]
 
 [project.urls]
