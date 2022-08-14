@@ -32,7 +32,7 @@ jobs:
       - run:
           name: Build docs
           command: |
-            python -m pip install -e ".[sphinx]"
+            python -m pip install ".[sphinx]"
             make -C docs/ html
 
 # Invoke jobs via workflows
