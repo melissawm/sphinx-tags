@@ -2,22 +2,14 @@
 
 """
 import os
-from docutils.parsers.rst import Directive
+from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 
 __version__ = "0.0.2"
 
-# TAGLINK is used to generate the link from within each narrative page
-TAGLINK = "tags/%s.html"
 TAGSTART = ".. tags::"
 
-on_rtd = os.environ.get('READTHEDOCS') == 'True'
-if on_rtd:
-    ROOTDIR = "."
-else:
-    ROOTDIR = "docs"
-
-class TagLinks(Directive):
+class TagLinks(SphinxDirective):
     """Custom directive for adding tags to Sphinx-generated files.
 
     Loosely based on https://stackoverflow.com/questions/18146107/how-to-add-blog-style-tags-in-restructuredtext-with-sphinx
@@ -32,7 +24,6 @@ class TagLinks(Directive):
 
     # Custom attributes
     separator = ","
-    taglink = TAGLINK
     intro_text = "Tags: "
 
     def run(self):
@@ -43,7 +34,7 @@ class TagLinks(Directive):
         count = 0
         for tag in tags:
             count += 1
-            link = self.taglink % tag
+            link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
             if not count == len(tags):
@@ -57,9 +48,9 @@ class Tag:
     def __init__(self, name, path):
         self.name = name
         self.items = []
-        self.filename = os.path.join(path, f"{self.name}.rst")
+        self.filename = f"{self.name}.rst"
 
-    def create_file(self, items):
+    def create_file(self, path, items):
         """Create rst file with list of documents associated with a given tag.
 
         This file is reached as a link from the tag name.
@@ -75,10 +66,10 @@ class Tag:
         content.append("")
         #  items is a list of files associated with this tag
         for item in items:
-            link = item.filename.replace(ROOTDIR, "")
-            content.append(f"    {item.title} <..{link}>")
+            link = item.filename
+            content.append(f"    {item.title} <../{link}>")
         content.append("")
-        with open(self.filename, "w", encoding="utf8") as f:
+        with open(os.path.join(path, self.filename), "w", encoding="utf8") as f:
             f.write("\n".join(content))
 
 
@@ -88,9 +79,10 @@ class Entry:
     We need the path, the title and the tags.
 
     """
-    def __init__(self, filepath):
-        self.filename = filepath
-        with open(filepath, "r", encoding="utf8") as f:
+    def __init__(self, filepath, filename):
+        self.filename = filename
+        self.filepath = os.path.join(filepath, filename)
+        with open(self.filepath, "r", encoding="utf8") as f:
             self.lines = f.read().split("\n")
         self.title = self.lines[0].strip()
         tagline = [line for line in self.lines if TAGSTART in line]
@@ -130,44 +122,49 @@ def tagpage(tags, path):
     for tag in tags:
         content.append(f"    {tag.name} <{tag.name}.rst>")
     content.append("")
-    filename = os.path.join(path, "index.rst")
+    
+    filename = os.path.join(path, "tagsindex.rst")
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
 
-
-def assign_entries(path):
+def assign_entries(app, path):
     """Assign all found entries to their tag."""
     pages = []
     tags = {}
-    for entryname in os.listdir(ROOTDIR):
+    for entryname in os.listdir(app.srcdir):
         if entryname.endswith(".rst"):
-            entry = Entry(os.path.join(ROOTDIR, entryname))
+            entry = Entry(app.srcdir, entryname)
             entry.assign_to_tags(tags, path)
             pages.append(entry)
     return tags, pages
 
-
 def update_tags(app, config):
-    if config.tags_create_tags:
-        path = os.path.join(ROOTDIR, config.tags_output_dir, "tags")
-        tags, pages = assign_entries(path)
+    if app.config.tags_create_tags:
+        path = os.path.join(config.tags_output_dir)
+        tags, pages = assign_entries(app, path)
         if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         for tag in tags.values():
-            tag.create_file([item for item in pages if tag.name in item.tags])
+            tag.create_file(path, [item for item in pages if tag.name in item.tags])
         tagpage(tags, path)
+        print("Tags updated")
     else:
-        print("Tags were not created (tags_create_tags=False)")
+        print("Tags were not created (tags_create_tags=False in conf.py)")
 
+def diagnostics(app, env, docnames):
+    print(f"Diagnostics: {docnames}")
 
 def setup(app):
     """Setup for Sphinx."""
-    app.add_config_value('tags_create_tags', False, 'html')
-    app.add_config_value('tags_output_dir', ".", "html")
 
-    # directives.register_directive("tags", TagLinks)
-    app.add_directive("tags", TagLinks)
+    # Create config keys (with default values)
+    # These values will be updated after config-inited
+    app.add_config_value('tags_create_tags', False, 'html')
+    app.add_config_value('tags_output_dir', '_tags', 'html')
+    app.add_config_value('remove_from_toctrees', [app.config.tags_output_dir,], 'html')
     app.connect("config-inited", update_tags)
+    app.add_directive("tags", TagLinks)
+    #app.connect("env-before-read-docs", diagnostics)
 
     return {
         'version': __version__,

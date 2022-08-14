@@ -11,6 +11,7 @@ Welcome to sphinx-tags's documentation!
    :caption: Contents:
 
    quickstart
+   configuration
    examples
    tests
 
