@@ -38,6 +38,7 @@ extensions = [
 
 tags_create_tags = True
 #tags_output_dir = "_tags"  # default
+tags_overview_title = "Site tags"  #default: "Tags overview"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -58,4 +59,9 @@ html_theme = 'pydata_sphinx_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+# html_static_path = ['_static']
+
+# html_sidebars = {
+#     "**": ["search-field.html", "sidebar-nav-bs.html", "sidebar-tags.html"],
+#     "_tags/*": ["search-field.html", "sidebar-nav-bs.html"],
+# }
