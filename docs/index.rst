@@ -6,21 +6,21 @@
 Welcome to sphinx-tags's documentation!
 =======================================
 
+sphinx-tags is a tiny Sphinx extension that implements blog-style tags for
+documentation.
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
+   :caption: Contents
 
    quickstart
    configuration
    examples
-   tests
-   release
+   devel
 
+.. toctree::
+   :caption: Site tags
+   :maxdepth: 2
+   :titlesonly:
 
-Indices and tables
-==================
-
-* :ref:`tagoverview`
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   _tags/tagsindex
