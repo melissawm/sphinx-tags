@@ -9,6 +9,7 @@ __version__ = "0.0.2dev"
 
 TAGSTART = ".. tags::"
 
+
 class TagLinks(SphinxDirective):
     """Custom directive for adding tags to Sphinx-generated files.
 
@@ -45,7 +46,7 @@ class TagLinks(SphinxDirective):
 class Tag:
     """A tag contains entries"""
 
-    def __init__(self, name, path):
+    def __init__(self, name):
         self.name = name
         self.items = []
         self.filename = f"{self.name}.rst"
@@ -92,22 +93,21 @@ class Entry:
             self.tags = tagline.split(",")
             self.tags = [tag.strip() for tag in self.tags]
 
-    def assign_to_tags(self, tag_dict, path):
+    def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
         for tag in self.tags:
             if tag not in tag_dict:
-                tag_dict[tag] = Tag(tag, path)
+                tag_dict[tag] = Tag(tag)
             tag_dict[tag].items.append(self)
 
 
-def tagpage(tags, path):
+def tagpage(tags, path, title):
     """Creates Tag overview page.
 
     This page contains a list of all available tags.
 
     """
     content = []
-    title = "Tag overview"
     content.append(":orphan:")
     content.append("")
     content.append(".. _tagoverview:")
@@ -115,44 +115,58 @@ def tagpage(tags, path):
     content.append(title)
     content.append("#" * len(title))
     content.append("")
-    content.append(".. toctree::")
-    content.append("    :maxdepth: 1")
-    content.append("")
     tags = list(tags.values())
+    # toctree for the page
+    for tag in tags:
+        content.append(f"* `{tag.name} ({len(tag.items)}) <{tag.name}.html>`_")
+    content.append("")
+    # toctree for the left sidebar (hidden)
+    content.append(".. toctree::")
+    content.append("    :caption: Site tags")
+    content.append("    :maxdepth: 1")
+    content.append("    :hidden:")
+    content.append("")
+
     for tag in tags:
         content.append(f"    {tag.name} <{tag.name}.rst>")
     content.append("")
-    
+
     filename = os.path.join(path, "tagsindex.rst")
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
 
-def assign_entries(app, path):
+
+def assign_entries(app):
     """Assign all found entries to their tag."""
     pages = []
     tags = {}
     for entryname in os.listdir(app.srcdir):
         if entryname.endswith(".rst"):
             entry = Entry(app.srcdir, entryname)
-            entry.assign_to_tags(tags, path)
+            entry.assign_to_tags(tags)
             pages.append(entry)
     return tags, pages
 
+
 def update_tags(app, config):
+    """Update tags according to pages found"""
     if app.config.tags_create_tags:
         path = os.path.join(config.tags_output_dir)
-        tags, pages = assign_entries(app, path)
+        tags, pages = assign_entries(app)
         if not os.path.exists(path):
             os.makedirs(path)
         for tag in tags.values():
             tag.create_file(path, [item for item in pages if tag.name in item.tags])
-        tagpage(tags, path)
+        tagpage(tags, path, config.tags_overview_title)
         print("Tags updated")
     else:
         print("Tags were not created (tags_create_tags=False in conf.py)")
 
+
 def diagnostics(app, env, docnames):
+    """Print found docs for debugging purposes"""
     print(f"Diagnostics: {docnames}")
+
 
 def setup(app):
     """Setup for Sphinx."""
@@ -161,10 +175,11 @@ def setup(app):
     # These values will be updated after config-inited
     app.add_config_value('tags_create_tags', False, 'html')
     app.add_config_value('tags_output_dir', '_tags', 'html')
+    app.add_config_value('tags_overview_title', 'Tags overview', 'html')
     app.add_config_value('remove_from_toctrees', [app.config.tags_output_dir,], 'html')
     app.connect("config-inited", update_tags)
     app.add_directive("tags", TagLinks)
-    #app.connect("env-before-read-docs", diagnostics)
+    # app.connect("env-before-read-docs", diagnostics)
 
     return {
         'version': __version__,
