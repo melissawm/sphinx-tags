@@ -5,7 +5,7 @@ import os
 from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 TAGSTART = ".. tags::"
 
