@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from sphinx_tags import __version__
 
 sys.path.insert(0, os.path.abspath("../src"))
 
@@ -23,7 +24,7 @@ copyright = '2022, melissawm'
 author = 'melissawm'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2dev'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
