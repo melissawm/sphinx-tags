@@ -32,6 +32,14 @@ Use pip or conda to install ``sphinx-tags``:
 Usage
 -----
 
+To enable ``sphinx-tags`` in your documentation, enable the extension on your
+``conf.py`` file::
+
+   extensions = [
+       ...
+       "sphinx_tags",
+   ]
+
 To assign one or more tags to a page in the documentation, use
 
 .. code-block:: rst
@@ -47,3 +55,17 @@ containing a table of contents of each file associated with that tag (see
 
 A :ref:`tagoverview` page is also created that can be added to the index and
 show all tags defined for this documentation set.
+
+.. note:: 
+
+   If you are using MyST to write your documentation in Markdown, you can use
+   
+   ::
+
+      ```{tags} tag1, tag2
+      ```
+
+.. note::
+
+   If you are using both ``md`` and ``rst`` files, all generated pages will be
+   created as Markdown files.

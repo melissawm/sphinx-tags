@@ -35,11 +35,13 @@ release = __version__
 extensions = [
     "sphinx_tags",
     "sphinx_design",
+    "myst_parser",
 ]
 
 tags_create_tags = True
 #tags_output_dir = "_tags"  # default
-tags_overview_title = "Site tags"  #default: "Tags overview"
+tags_overview_title = "All tags"  # default: "Tags overview"
+#tags_extension = ["rst", "md"]  # default: ["rst"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
