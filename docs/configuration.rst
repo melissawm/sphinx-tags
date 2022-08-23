@@ -6,9 +6,15 @@ Configuration for sphinx-tags
 A few custom configuration keys can be used in your ``conf.py`` file.
 
 - ``tags_create_tags``
-  - Default: ``True``
+  - Whether to process tags or not. Default: ``True``
 - ``tags_output_dir``
-  - Default: ``_tags``
+  - Output directory for the tags source files, relative to the project root.
+  Default: ``_tags``
+- ``tags_extension``
+  - A list of file extensions to inspect. Use ``"rst"`` if you are using pure
+  Sphinx, and ``"md"`` if your are using MyST. Note that if you list both
+  ``["md", "rst"]``, all generated pages to be created as Markdown files.
+  Default: ``["rst"]``
 
 Tags overview page
 ------------------

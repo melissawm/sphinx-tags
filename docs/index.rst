@@ -15,7 +15,7 @@ documentation.
 
    quickstart
    configuration
-   examples
+   examples.md
    devel
 
 .. toctree::
