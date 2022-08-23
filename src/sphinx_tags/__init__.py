@@ -2,12 +2,14 @@
 
 """
 import os
+from sphinx.util.logging import getLogger
 from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.0.4dev"
+__version__ = "0.1"
 
+logger = getLogger('sphinx-tags')
 
 class TagLinks(SphinxDirective):
     """Custom directive for adding tags to Sphinx-generated files.
@@ -79,7 +81,6 @@ class Tag:
             filename = f"{self.name}.md"
             content.append(f"# {self.name}")
             content.append("")
-            #  Return link block at the start of the page"""
             content.append("```{toctree}")
             content.append("---")
             content.append("maxdepth: 1")
@@ -203,10 +204,10 @@ def assign_entries(app):
     return tags, pages
 
 
-def update_tags(app, config):
+def update_tags(app):
     """Update tags according to pages found"""
     if app.config.tags_create_tags:
-        tags_output_dir = Path(config.tags_output_dir)
+        tags_output_dir = Path(app.config.tags_output_dir)
         if not os.path.exists(tags_output_dir):
             os.makedirs(tags_output_dir)
 
@@ -214,19 +215,19 @@ def update_tags(app, config):
         tags, pages = assign_entries(app)
         for tag in tags.values():
             tag.create_file([item for item in pages if tag.name in item.tags],
-                            config.tags_extension,
+                            app.config.tags_extension,
                             tags_output_dir,
                             app.srcdir
                             )
         # Create tags overview page
         tagpage(tags,
                 tags_output_dir,
-                config.tags_overview_title,
-                config.tags_extension
+                app.config.tags_overview_title,
+                app.config.tags_extension
                 )
-        print("Tags updated")
+        logger.info("Tags updated", color="white")
     else:
-        print("Tags were not created (tags_create_tags=False in conf.py)")
+        logger.info("Tags were not created (tags_create_tags=False in conf.py)", color="white")
 
 
 def setup(app):
@@ -245,7 +246,10 @@ def setup(app):
                          'html')
 
     # Update tags
-    app.connect("config-inited", update_tags)
+    # TODO: tags should be updated after sphinx-gallery is generated, and the
+    # gallery is also connected to builder-inited. Are there situations when
+    # this will not work?
+    app.connect("builder-inited", update_tags)
     app.add_directive("tags", TagLinks)
 
     return {
