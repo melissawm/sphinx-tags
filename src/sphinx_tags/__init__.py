@@ -9,7 +9,8 @@ from pathlib import Path
 
 __version__ = "0.1"
 
-logger = getLogger('sphinx-tags')
+logger = getLogger("sphinx-tags")
+
 
 class TagLinks(SphinxDirective):
     """Custom directive for adding tags to Sphinx-generated files.
@@ -19,6 +20,7 @@ class TagLinks(SphinxDirective):
     See also https://docutils.sourceforge.io/docs/howto/rst-directives.html
 
     """
+
     # Sphinx directive class attributes
     required_arguments = 1
     optional_arguments = 200  # Arbitrary.
@@ -36,10 +38,9 @@ class TagLinks(SphinxDirective):
         count = 0
         for tag in tags:
             count += 1
-            link = os.path.join(self.env.app.outdir,
-                                self.env.app.config.tags_output_dir,
-                                f"{tag}.html"
-                                )
+            link = os.path.join(
+                self.env.app.outdir, self.env.app.config.tags_output_dir, f"{tag}.html"
+            )
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
             if not count == len(tags):
@@ -60,12 +61,12 @@ class Tag:
 
         This file is reached as a link from the tag name in each documentation
         file, or from the tag overview page.
-        
+
         If we are using md files, generate and md file; otherwise, go with rst.
 
         Parameters
         ----------
-        
+
         tags_output_dir : Path
             path where the file for this tag will be created
         items : list
@@ -114,9 +115,8 @@ class Tag:
 
 
 class Entry:
-    """Extracted info from source file (*.rst/*.md)
+    """Extracted info from source file (*.rst/*.md)"""
 
-    """
     def __init__(self, entrypath):
         self.filepath = entrypath
         with open(self.filepath, "r", encoding="utf8") as f:
@@ -214,20 +214,24 @@ def update_tags(app):
         # Create pages for each tag
         tags, pages = assign_entries(app)
         for tag in tags.values():
-            tag.create_file([item for item in pages if tag.name in item.tags],
-                            app.config.tags_extension,
-                            tags_output_dir,
-                            app.srcdir
-                            )
-        # Create tags overview page
-        tagpage(tags,
+            tag.create_file(
+                [item for item in pages if tag.name in item.tags],
+                app.config.tags_extension,
                 tags_output_dir,
-                app.config.tags_overview_title,
-                app.config.tags_extension
-                )
+                app.srcdir,
+            )
+        # Create tags overview page
+        tagpage(
+            tags,
+            tags_output_dir,
+            app.config.tags_overview_title,
+            app.config.tags_extension,
+        )
         logger.info("Tags updated", color="white")
     else:
-        logger.info("Tags were not created (tags_create_tags=False in conf.py)", color="white")
+        logger.info(
+            "Tags were not created (tags_create_tags=False in conf.py)", color="white"
+        )
 
 
 def setup(app):
@@ -236,14 +240,18 @@ def setup(app):
     # Create config keys (with default values)
     # These values will be updated after config-inited
 
-    app.add_config_value('tags_create_tags', False, 'html')
-    app.add_config_value('tags_output_dir', '_tags', 'html')
-    app.add_config_value('tags_overview_title', 'Tags overview', 'html')
-    app.add_config_value('tags_extension', ['rst'], 'html')
+    app.add_config_value("tags_create_tags", False, "html")
+    app.add_config_value("tags_output_dir", "_tags", "html")
+    app.add_config_value("tags_overview_title", "Tags overview", "html")
+    app.add_config_value("tags_extension", ["rst"], "html")
     # internal config values
-    app.add_config_value('remove_from_toctrees',
-                         [app.config.tags_output_dir,],
-                         'html')
+    app.add_config_value(
+        "remove_from_toctrees",
+        [
+            app.config.tags_output_dir,
+        ],
+        "html",
+    )
 
     # Update tags
     # TODO: tags should be updated after sphinx-gallery is generated, and the
@@ -253,7 +261,7 @@ def setup(app):
     app.add_directive("tags", TagLinks)
 
     return {
-        'version': __version__,
-        'parallel_read_safe': True,
-        'parallel_write_safe': True,
+        "version": __version__,
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
     }

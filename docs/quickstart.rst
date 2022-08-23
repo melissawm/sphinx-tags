@@ -56,10 +56,10 @@ containing a table of contents of each file associated with that tag (see
 A :ref:`tagoverview` page is also created that can be added to the index and
 show all tags defined for this documentation set.
 
-.. note:: 
+.. note::
 
    If you are using MyST to write your documentation in Markdown, you can use
-   
+
    ::
 
       ```{tags} tag1, tag2

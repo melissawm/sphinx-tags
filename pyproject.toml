@@ -17,6 +17,7 @@ keywords = [
 
 dependencies = [
     "sphinx>4",
+    "pre-commit",
 ]
 
 [project.optional-dependencies]
