@@ -13,7 +13,6 @@ Installation
 
 Use pip or conda to install ``sphinx-tags``:
 
-.. tab-set::
 
     .. tab-item:: pip
 

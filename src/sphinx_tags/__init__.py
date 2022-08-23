@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1.1"
+__version__ = "0.1.2dev"
 
 logger = getLogger("sphinx-tags")
 
@@ -40,12 +40,13 @@ class TagLinks(SphinxDirective):
             count += 1
             on_rtd = os.environ.get("READTHEDOCS") == "True"
             if on_rtd:
-                rootdir = "."
+                link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
             else:
-                rootdir = self.env.app.outdir
-            link = os.path.join(
-                rootdir, self.env.app.config.tags_output_dir, f"{tag}.html"
-            )
+                link = os.path.join(
+                    self.env.app.outdir,
+                    self.env.app.config.tags_output_dir,
+                    f"{tag}.html",
+                )
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
             if not count == len(tags):

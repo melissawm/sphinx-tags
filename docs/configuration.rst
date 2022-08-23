@@ -34,6 +34,6 @@ how many pages are associated with each tag.
 Tags in the sidebar
 -------------------
 
-By default, ``sphinx-tags`` will generate a hidden ``toctree`` element for the
-"Tags overview" page. This means that if your theme uses a sidebar navigation
-element, your tags will appear there.
+By default, ``sphinx-tags`` will generate a ``toctree`` element for the "Tags
+overview" page. This means that if your theme uses a sidebar navigation element,
+your tags will appear there.
