@@ -33,6 +33,9 @@ To build the documentation locally, use
 sphinx-build docs docs/_build/html
 ```
 
+`sphinx-tags` uses [pre-commit](https://pre-commit.com/), and code is formatted
+according to [black](https://github.com/psf/black)
+
 ## Code of Conduct
 
 All contributors and maintainers are expected to follow the
