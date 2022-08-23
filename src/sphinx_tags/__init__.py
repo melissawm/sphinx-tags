@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1"
+__version__ = "0.1.1dev"
 
 logger = getLogger("sphinx-tags")
 
@@ -38,8 +38,13 @@ class TagLinks(SphinxDirective):
         count = 0
         for tag in tags:
             count += 1
+            on_rtd = os.environ.get("READTHEDOCS") == "True"
+            if on_rtd:
+                rootdir = "."
+            else:
+                rootdir = self.env.app.outdir
             link = os.path.join(
-                self.env.app.outdir, self.env.app.config.tags_output_dir, f"{tag}.html"
+                rootdir, self.env.app.config.tags_output_dir, f"{tag}.html"
             )
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
@@ -80,7 +85,7 @@ class Tag:
         content = []
         if "md" in extension:
             filename = f"{self.name}.md"
-            content.append(f"# {self.name}")
+            content.append(f"# Tag: {self.name}")
             content.append("")
             content.append("```{toctree}")
             content.append("---")
@@ -95,8 +100,8 @@ class Tag:
             content.append("```")
         else:
             filename = f"{self.name}.rst"
-            content.append(self.name)
-            content.append("#" * len(self.name))
+            content.append(f"Tag: {self.name}")
+            content.append("#" * len(self.name) + "#####")
             content.append("")
             #  Return link block at the start of the page"""
             content.append(".. toctree::")
@@ -159,7 +164,7 @@ def tagpage(tags, tags_output_dir, title, extension):
         # toctree for this page
         content.append("```{toctree}")
         content.append("---")
-        content.append("caption: Site tags")
+        content.append("caption: Tags")
         content.append("maxdepth: 1")
         content.append("---")
         for tag in tags:
@@ -178,7 +183,7 @@ def tagpage(tags, tags_output_dir, title, extension):
         content.append("")
         # toctree for the page
         content.append(".. toctree::")
-        content.append("    :caption: Site tags")
+        content.append("    :caption: Tags")
         content.append("    :maxdepth: 1")
         content.append("")
         for tag in tags:
