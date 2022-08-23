@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1.2dev"
+__version__ = "0.1.2"
 
 logger = getLogger("sphinx-tags")
 
