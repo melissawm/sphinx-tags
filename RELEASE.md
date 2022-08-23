@@ -1,6 +1,6 @@
 # How to cut a release
 
-`sphinx-tags` uses [flit]() to manage releases.
+`sphinx-tags` uses [flit](https://github.com/pypa/flit) to manage releases.
 
 To cut a new release:
 
