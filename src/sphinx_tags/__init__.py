@@ -39,20 +39,21 @@ class TagLinks(SphinxDirective):
         for tag in tags:
             count += 1
             on_rtd = os.environ.get("READTHEDOCS") == "True"
-            # if on_rtd:
-            #     link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
-            # else:
-            #     link = os.path.join(
-            #         self.env.app.outdir,
-            #         self.env.app.config.tags_output_dir,
-            #         f"{tag}.html",
-            #     )
-            link = os.path.join(
-                self.env.app.srcdir,
-                self.env.app.outdir,
-                self.env.app.config.tags_output_dir,
-                f"{tag}.html",
-            )
+            if on_rtd:
+                link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
+            else:
+                link = os.path.join(
+                    self.env.app.srcdir,
+                    self.env.app.outdir,
+                    self.env.app.config.tags_output_dir,
+                    f"{tag}.html",
+                )
+            # link = os.path.join(
+            #     self.env.app.srcdir,
+            #     self.env.app.outdir,
+            #     self.env.app.config.tags_output_dir,
+            #     f"{tag}.html",
+            # )
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
             if not count == len(tags):
