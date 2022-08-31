@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1.2"
+__version__ = "0.1.3dev"
 
 logger = getLogger("sphinx-tags")
 
@@ -39,14 +39,20 @@ class TagLinks(SphinxDirective):
         for tag in tags:
             count += 1
             on_rtd = os.environ.get("READTHEDOCS") == "True"
-            if on_rtd:
-                link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
-            else:
-                link = os.path.join(
-                    self.env.app.outdir,
-                    self.env.app.config.tags_output_dir,
-                    f"{tag}.html",
-                )
+            # if on_rtd:
+            #     link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
+            # else:
+            #     link = os.path.join(
+            #         self.env.app.outdir,
+            #         self.env.app.config.tags_output_dir,
+            #         f"{tag}.html",
+            #     )
+            link = os.path.join(
+                self.env.app.srcdir,
+                self.env.app.outdir,
+                self.env.app.config.tags_output_dir,
+                f"{tag}.html",
+            )
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
             if not count == len(tags):
@@ -116,7 +122,9 @@ class Tag:
                 content.append(f"    ../{relpath}")
 
         content.append("")
-        with open(os.path.join(tags_output_dir, filename), "w", encoding="utf8") as f:
+        with open(
+            os.path.join(srcdir, tags_output_dir, filename), "w", encoding="utf8"
+        ) as f:
             f.write("\n".join(content))
 
 
@@ -148,7 +156,7 @@ class Entry:
             tag_dict[tag].items.append(self)
 
 
-def tagpage(tags, tags_output_dir, title, extension):
+def tagpage(tags, outdir, title, extension):
     """Creates Tag overview page.
 
     This page contains a list of all available tags.
@@ -172,7 +180,7 @@ def tagpage(tags, tags_output_dir, title, extension):
             content.append(f"{tag.name} ({len(tag.items)}) <{tag.name}>")
         content.append("```")
         content.append("")
-        filename = os.path.join(tags_output_dir, "tagsindex.md")
+        filename = os.path.join(outdir, "tagsindex.md")
     else:
         content = []
         content.append(":orphan:")
@@ -190,7 +198,7 @@ def tagpage(tags, tags_output_dir, title, extension):
         for tag in tags:
             content.append(f"    {tag.name} ({len(tag.items)}) <{tag.name}.rst>")
         content.append("")
-        filename = os.path.join(tags_output_dir, "tagsindex.rst")
+        filename = os.path.join(outdir, "tagsindex.rst")
 
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
@@ -214,8 +222,8 @@ def update_tags(app):
     """Update tags according to pages found"""
     if app.config.tags_create_tags:
         tags_output_dir = Path(app.config.tags_output_dir)
-        if not os.path.exists(tags_output_dir):
-            os.makedirs(tags_output_dir)
+        if not os.path.exists(os.path.join(app.srcdir, tags_output_dir)):
+            os.makedirs(os.path.join(app.srcdir, tags_output_dir))
 
         # Create pages for each tag
         tags, pages = assign_entries(app)
@@ -229,7 +237,7 @@ def update_tags(app):
         # Create tags overview page
         tagpage(
             tags,
-            tags_output_dir,
+            os.path.join(app.srcdir, tags_output_dir),
             app.config.tags_overview_title,
             app.config.tags_extension,
         )
