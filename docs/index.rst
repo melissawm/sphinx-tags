@@ -17,6 +17,7 @@ documentation.
    configuration
    examples.md
    devel
+   details/RELEASE.md
 
 .. toctree::
    :caption: Site tags

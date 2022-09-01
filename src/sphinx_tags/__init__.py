@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1.3"
+__version__ = "0.1.3dev"
 
 logger = getLogger("sphinx-tags")
 
@@ -38,22 +38,17 @@ class TagLinks(SphinxDirective):
         count = 0
         for tag in tags:
             count += 1
-            on_rtd = os.environ.get("READTHEDOCS") == "True"
-            if on_rtd:
-                link = os.path.join(self.env.app.config.tags_output_dir, f"{tag}.html")
-            else:
-                link = os.path.join(
-                    self.env.app.srcdir,
-                    self.env.app.outdir,
-                    self.env.app.config.tags_output_dir,
-                    f"{tag}.html",
-                )
-            # link = os.path.join(
-            #     self.env.app.srcdir,
-            #     self.env.app.outdir,
-            #     self.env.app.config.tags_output_dir,
-            #     f"{tag}.html",
-            # )
+            # We want the link to be the path to the _tags folder, relative to this document's path
+            # where
+            #
+            #  - self.env.app.config.tags_output_dir
+            # |
+            #  - subfolder
+            #   |
+            #    - current_doc_path
+            docpath = Path(self.env.doc2path(self.env.docname)).parent
+            rootdir = os.path.relpath(self.env.app.config.tags_output_dir, docpath)
+            link = os.path.join(rootdir, f"{tag}.html")
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
             if not count == len(tags):
