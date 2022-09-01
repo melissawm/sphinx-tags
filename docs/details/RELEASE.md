@@ -2,6 +2,9 @@
 
 `sphinx-tags` uses [flit](https://github.com/pypa/flit) to manage releases.
 
+```{tags} development
+```
+
 To cut a new release:
 
 1. Make sure the version string in `src/sphinx_tags/__init__.py` is updated with
