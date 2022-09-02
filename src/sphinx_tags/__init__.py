@@ -47,7 +47,10 @@ class TagLinks(SphinxDirective):
             #   |
             #    - current_doc_path
             docpath = Path(self.env.doc2path(self.env.docname)).parent
-            rootdir = os.path.relpath(self.env.app.config.tags_output_dir, docpath)
+            rootdir = os.path.relpath(
+                os.path.join(self.env.app.srcdir, self.env.app.config.tags_output_dir),
+                docpath,
+            )
             link = os.path.join(rootdir, f"{tag}.html")
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
