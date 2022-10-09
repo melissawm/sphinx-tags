@@ -42,6 +42,10 @@ tags_create_tags = True
 # tags_output_dir = "_tags"  # default
 tags_overview_title = "All tags"  # default: "Tags overview"
 tags_extension = ["rst", "md"]  # default: ["rst"]
+tags_intro_text = "Tags in this page:"  # default: "Tags:"
+tags_page_title = "All my tags"  # default: "My tags:"
+tags_page_header = "Pages with this tag"  # default: "With this tag"
+tags_index_head = "Tags in this site"  # default: "Tags"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
