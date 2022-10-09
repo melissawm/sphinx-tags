@@ -24,6 +24,9 @@ A few custom configuration keys can be used in your ``conf.py`` file.
 - ``tags_index_head``
   - The string used as caption in the tagsindex file.
   Default: ``Tags``
+- ``tags_intro_text``
+  - The string used on pages that have tags.
+  Default: ``Tags``
 
 Tags overview page
 ------------------

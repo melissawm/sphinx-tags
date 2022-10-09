@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 logger = getLogger("sphinx-tags")
 
@@ -28,14 +28,14 @@ class TagLinks(SphinxDirective):
 
     # Custom attributes
     separator = ","
-    intro_text = "In categories: "
-
+    
     def run(self):
         tags = [arg.replace(self.separator, "") for arg in self.arguments]
         result = nodes.paragraph()
-        result["classes"] = ["tags"]
-        result += nodes.inline(text=self.intro_text)
+        result["classes"] = ["tags"]        
+        result += nodes.inline(text=self.env.app.config.tags_intro_text)
         count = 0
+
         for tag in tags:
             count += 1
             # We want the link to be the path to the _tags folder, relative to this document's path
@@ -47,10 +47,12 @@ class TagLinks(SphinxDirective):
             #   |
             #    - current_doc_path
             docpath = Path(self.env.doc2path(self.env.docname)).parent
+         
             rootdir = os.path.relpath(
                 os.path.join(self.env.app.srcdir, self.env.app.config.tags_output_dir),
                 docpath,
             )
+
             link = os.path.join(rootdir, f"{tag}.html")
             tag_node = nodes.reference(refuri=link, text=tag)
             result += tag_node
@@ -87,9 +89,11 @@ class Tag:
         srcdir : str
             root folder for the documentation (usually, project/docs)
         tags_page_title: str
-            the title of the tag page, after which the tag is listed (e.g. "Tag: ...")
+            the title of the tag page, after which the tag is listed (e.g. "Tag: programming")
         tags_page_header: str
-            the words after which the pages with the tag are listed, e.g. "With this tag")
+            the words after which the pages with the tag are listed, e.g. "With this tag: Hello World")
+        tag_intro_text: str
+            the words after which the tags of a given page are listed, e.g. "Tags: programming, python")
 
 
         """
@@ -99,7 +103,7 @@ class Tag:
             content.append(f"# {tags_page_title}: {self.name}")
             content.append("")
             content.append("```{toctree}")
-            content.append("--------")
+            content.append("---")
             content.append("maxdepth: 1")
             content.append(f"caption: {tags_page_header}")
             content.append("---")
@@ -225,9 +229,15 @@ def assign_entries(app):
 def update_tags(app):
     """Update tags according to pages found"""
     if app.config.tags_create_tags:
+
         tags_output_dir = Path(app.config.tags_output_dir)
+
         if not os.path.exists(os.path.join(app.srcdir, tags_output_dir)):
             os.makedirs(os.path.join(app.srcdir, tags_output_dir))
+
+        for file in os.listdir(os.path.join(app.srcdir, tags_output_dir)):        
+            if file.endswith('md') or file.endswith('rst'):
+                os.remove(os.path.join(app.srcdir, tags_output_dir, file))                
 
         # Create pages for each tag
         tags, pages = assign_entries(app)
@@ -265,6 +275,7 @@ def setup(app):
     app.add_config_value("tags_output_dir", "_tags", "html")
     app.add_config_value("tags_overview_title", "Tags overview", "html")
     app.add_config_value("tags_extension", ["rst"], "html")
+    app.add_config_value("tags_intro_text", "Tags: ", "html")
     app.add_config_value("tags_page_title", "My tags", "html")
     app.add_config_value("tags_page_header", "With this tag", "html")
     app.add_config_value("tags_index_head", "Tags", "html")
@@ -283,6 +294,8 @@ def setup(app):
     # this will not work?
     app.connect("builder-inited", update_tags)
     app.add_directive("tags", TagLinks)
+
+
 
     return {
         "version": __version__,
