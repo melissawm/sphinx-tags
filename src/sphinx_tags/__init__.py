@@ -7,7 +7,7 @@ from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
 
-__version__ = "0.1.7"
+__version__ = "0.1.6"
 
 logger = getLogger("sphinx-tags")
 
@@ -28,12 +28,12 @@ class TagLinks(SphinxDirective):
 
     # Custom attributes
     separator = ","
-    
+
     def run(self):
         tags = [arg.replace(self.separator, "") for arg in self.arguments]
         result = nodes.paragraph()
-        result["classes"] = ["tags"]        
-        result += nodes.inline(text=self.env.app.config.tags_intro_text)
+        result["classes"] = ["tags"]
+        result += nodes.inline(text=f"{self.env.app.config.tags_intro_text} ")
         count = 0
 
         for tag in tags:
@@ -47,7 +47,7 @@ class TagLinks(SphinxDirective):
             #   |
             #    - current_doc_path
             docpath = Path(self.env.doc2path(self.env.docname)).parent
-         
+
             rootdir = os.path.relpath(
                 os.path.join(self.env.app.srcdir, self.env.app.config.tags_output_dir),
                 docpath,
@@ -68,7 +68,15 @@ class Tag:
         self.name = name
         self.items = []
 
-    def create_file(self, items, extension, tags_output_dir, srcdir, tags_page_title, tags_page_header):
+    def create_file(
+        self,
+        items,
+        extension,
+        tags_output_dir,
+        srcdir,
+        tags_page_title,
+        tags_page_header,
+    ):
         """Create file with list of documents associated with a given tag in
         toctree format.
 
@@ -184,7 +192,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append(f"caption: {tags_index_head}")
         content.append("maxdepth: 1")
         content.append("---")
-        for tag in sorted(tags, key = lambda t: t.name):
+        for tag in sorted(tags, key=lambda t: t.name):
             content.append(f"{tag.name} ({len(tag.items)}) <{tag.name}>")
         content.append("```")
         content.append("")
@@ -203,7 +211,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append(f"    :caption: {tags_index_head}")
         content.append("    :maxdepth: 1")
         content.append("")
-        for tag in sorted(tags, key = lambda t: t.name):
+        for tag in sorted(tags, key=lambda t: t.name):
             content.append(f"    {tag.name} ({len(tag.items)}) <{tag.name}.rst>")
         content.append("")
         filename = os.path.join(outdir, "tagsindex.rst")
@@ -235,9 +243,9 @@ def update_tags(app):
         if not os.path.exists(os.path.join(app.srcdir, tags_output_dir)):
             os.makedirs(os.path.join(app.srcdir, tags_output_dir))
 
-        for file in os.listdir(os.path.join(app.srcdir, tags_output_dir)):        
-            if file.endswith('md') or file.endswith('rst'):
-                os.remove(os.path.join(app.srcdir, tags_output_dir, file))                
+        for file in os.listdir(os.path.join(app.srcdir, tags_output_dir)):
+            if file.endswith("md") or file.endswith("rst"):
+                os.remove(os.path.join(app.srcdir, tags_output_dir, file))
 
         # Create pages for each tag
         tags, pages = assign_entries(app)
@@ -248,7 +256,7 @@ def update_tags(app):
                 tags_output_dir,
                 app.srcdir,
                 app.config.tags_page_title,
-                app.config.tags_page_header                
+                app.config.tags_page_header,
             )
         # Create tags overview page
         tagpage(
@@ -256,7 +264,7 @@ def update_tags(app):
             os.path.join(app.srcdir, tags_output_dir),
             app.config.tags_overview_title,
             app.config.tags_extension,
-            app.config.tags_index_head
+            app.config.tags_index_head,
         )
         logger.info("Tags updated", color="white")
     else:
@@ -275,11 +283,12 @@ def setup(app):
     app.add_config_value("tags_output_dir", "_tags", "html")
     app.add_config_value("tags_overview_title", "Tags overview", "html")
     app.add_config_value("tags_extension", ["rst"], "html")
-    app.add_config_value("tags_intro_text", "Tags: ", "html")
+    app.add_config_value("tags_intro_text", "Tags:", "html")
     app.add_config_value("tags_page_title", "My tags", "html")
     app.add_config_value("tags_page_header", "With this tag", "html")
     app.add_config_value("tags_index_head", "Tags", "html")
-        # internal config values
+
+    # internal config values
     app.add_config_value(
         "remove_from_toctrees",
         [
@@ -294,8 +303,6 @@ def setup(app):
     # this will not work?
     app.connect("builder-inited", update_tags)
     app.add_directive("tags", TagLinks)
-
-
 
     return {
         "version": __version__,
