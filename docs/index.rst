@@ -16,8 +16,7 @@ documentation.
    quickstart
    configuration
    examples.md
-   devel
-   details/RELEASE.md
+   dev/RELEASE.md
 
 .. toctree::
    :caption: Site tags
