@@ -2,6 +2,8 @@
 
 A tiny Sphinx extension that implements blog-style tags for documentation.
 
+**🗣 If you use this extension in your project, please drop us a note [in this discussion post](https://github.com/melissawm/sphinx-tags/discussions/32)** 
+
 ## Installation
 
 After activating a virtual environment manager such as `venv` or `conda`, use
