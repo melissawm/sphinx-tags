@@ -118,7 +118,7 @@ class Tag:
             #  items is a list of files associated with this tag
             for item in items:
                 # We want here the filepath relative to /docs/_tags
-                relpath = item.filepath.relative_to(srcdir)
+                relpath = item.filepath.relative_to(srcdir).as_posix()
                 content.append(f"../{relpath}")
             content.append("```")
         else:
@@ -134,7 +134,7 @@ class Tag:
             #  items is a list of files associated with this tag
             for item in sorted(items, key=lambda i: i.filepath):
                 # We want here the filepath relative to /docs/_tags
-                relpath = item.filepath.relative_to(srcdir)
+                relpath = item.filepath.relative_to(srcdir).as_posix()
                 content.append(f"    ../{relpath}")
 
         content.append("")
