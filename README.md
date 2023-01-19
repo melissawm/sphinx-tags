@@ -11,6 +11,11 @@ After activating a virtual environment manager such as `venv` or `conda`, use
 ```
 python -m pip install sphinx-tags
 ```
+or
+
+```
+conda install sphinx-tags -c conda-forge
+```
 
 ## Usage
 
