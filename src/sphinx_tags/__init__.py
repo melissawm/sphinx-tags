@@ -39,8 +39,8 @@ class TagLinks(SphinxDirective):
 
         for tag in tags:
             count += 1
-            # We want the link to be the path to the _tags folder, relative to this document's path
-            # where
+            # We want the link to be the path to the _tags folder, relative to
+            # this document's path where
             #
             #  - self.env.app.config.tags_output_dir
             # |
@@ -48,7 +48,6 @@ class TagLinks(SphinxDirective):
             #   |
             #    - current_doc_path
             docpath = Path(self.env.doc2path(self.env.docname)).parent
-
             rootdir = os.path.relpath(
                 os.path.join(self.env.app.srcdir, self.env.app.config.tags_output_dir),
                 docpath,
@@ -100,9 +99,9 @@ class Tag:
         tags_page_title: str
             the title of the tag page, after which the tag is listed (e.g. "Tag: programming")
         tags_page_header: str
-            the words after which the pages with the tag are listed, e.g. "With this tag: Hello World")
+            the words after which the pages with the tag are listed (e.g. "With this tag: Hello World")
         tag_intro_text: str
-            the words after which the tags of a given page are listed, e.g. "Tags: programming, python")
+            the words after which the tags of a given page are listed (e.g. "Tags: programming, python")
 
 
         """
@@ -119,7 +118,10 @@ class Tag:
             #  items is a list of files associated with this tag
             for item in items:
                 # We want here the filepath relative to /docs/_tags
-                relpath = item.filepath.relative_to(srcdir).as_posix()
+                # pathlib does not support relative paths for two absolute paths
+                relpath = Path(
+                    os.path.relpath(item.filepath, srcdir)
+                ).as_posix()
                 content.append(f"../{relpath}")
             content.append("```")
         else:
@@ -152,7 +154,7 @@ class Entry:
     """Extracted info from source file (*.rst/*.md)"""
 
     def __init__(self, entrypath):
-        self.filepath = Path(entrypath).resolve()
+        self.filepath = Path(entrypath)
         with open(self.filepath, "r", encoding="utf8") as f:
             self.lines = f.read().split("\n")
         if self.filepath.name.endswith(".rst"):
