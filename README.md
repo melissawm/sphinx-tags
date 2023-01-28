@@ -2,7 +2,7 @@
 
 A tiny Sphinx extension that implements blog-style tags for documentation.
 
-**🗣 If you use this extension in your project, please drop us a note [in this discussion post](https://github.com/melissawm/sphinx-tags/discussions/32)** 
+**🗣 If you use this extension in your project, please drop us a note [in this discussion post](https://github.com/melissawm/sphinx-tags/discussions/32)**
 
 ## Installation
 
@@ -23,7 +23,7 @@ Refer to the [documentation](https://sphinx-tags.readthedocs.io/en/latest/) for 
 
 ## Contributing
 
-Feel free to submit issues or PRs - keep in mind this is experimental!
+Feel free to submit issues or PRs - keep in mind this project is experimental!
 
 ### Setup for development
 
@@ -42,6 +42,10 @@ sphinx-build docs docs/_build/html
 
 `sphinx-tags` uses [pre-commit](https://pre-commit.com/), and code is formatted
 according to [black](https://github.com/psf/black)
+
+### Contribution guide
+
+If you want to submit Pull requests to this repository, please follow the [contribution guidelines]().
 
 ## Code of Conduct
 
