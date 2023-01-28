@@ -73,11 +73,9 @@ class TagLinks(SphinxDirective):
         """Get a sphinx-design reference badge for the given tag"""
         from sphinx_design.badges_buttons import XRefBadgeRole
 
-        # If the tag happens to be the first line of an rST document, then not all RSTState.Inliner
-        # attributes have been set yet, so we need to set them manually.
-        self.state.inliner.document = self.state.document
-        self.state.inliner.reporter = self.state.document.reporter
-        self.state.inliner.language = self.state.memo.language
+        # Required to set Inliner state, since we're directly creating a role object.
+        # Typically this would be done when parsing the role from document text.
+        text_nodes, messages = self.state.inline_text("", self.lineno)
 
         # Ref paths always use forward slashes, even on Windows
         tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{tag}>"
