@@ -6,7 +6,7 @@ Configuration for sphinx-tags
 A few custom configuration keys can be used in your ``conf.py`` file.
 
 - ``tags_create_tags``
-  - Whether to process tags or not. Default: ``True``
+  - Whether to process tags or not. Default: ``False``
 - ``tags_output_dir``
   - Output directory for the tags source files, relative to the project root.
   Default: ``_tags``
