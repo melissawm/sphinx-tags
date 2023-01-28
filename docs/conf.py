@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 # -- Project information -----------------------------------------------------
 
 project = "sphinx-tags"
-copyright = "2022, melissawm"
+copyright = "2023, melissawm"
 author = "melissawm"
 
 # The full version, including alpha/beta/rc tags
@@ -39,6 +39,7 @@ extensions = [
 ]
 
 tags_create_tags = True
+tags_create_badges = True
 # tags_output_dir = "_tags"  # default
 tags_overview_title = "All tags"  # default: "Tags overview"
 tags_extension = ["rst", "md"]  # default: ["rst"]
