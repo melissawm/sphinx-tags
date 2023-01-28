@@ -45,7 +45,7 @@ according to [black](https://github.com/psf/black)
 
 ### Contribution guide
 
-If you want to submit Pull requests to this repository, please follow the [contribution guidelines]().
+If you want to submit Pull requests to this repository, please follow the [contribution guidelines](https://sphinx-tags.readthedocs.io/en/latest/dev/index.html).
 
 ## Code of Conduct
 
