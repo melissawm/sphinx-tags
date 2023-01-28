@@ -6,6 +6,7 @@ from sphinx.util.logging import getLogger
 from sphinx.util.docutils import SphinxDirective
 from docutils import nodes
 from pathlib import Path
+from glob import glob
 
 __version__ = "0.1.6"
 
@@ -38,8 +39,8 @@ class TagLinks(SphinxDirective):
 
         for tag in tags:
             count += 1
-            # We want the link to be the path to the _tags folder, relative to this document's path
-            # where
+            # We want the link to be the path to the _tags folder, relative to
+            # this document's path where
             #
             #  - self.env.app.config.tags_output_dir
             # |
@@ -47,7 +48,6 @@ class TagLinks(SphinxDirective):
             #   |
             #    - current_doc_path
             docpath = Path(self.env.doc2path(self.env.docname)).parent
-
             rootdir = os.path.relpath(
                 os.path.join(self.env.app.srcdir, self.env.app.config.tags_output_dir),
                 docpath,
@@ -99,9 +99,9 @@ class Tag:
         tags_page_title: str
             the title of the tag page, after which the tag is listed (e.g. "Tag: programming")
         tags_page_header: str
-            the words after which the pages with the tag are listed, e.g. "With this tag: Hello World")
+            the words after which the pages with the tag are listed (e.g. "With this tag: Hello World")
         tag_intro_text: str
-            the words after which the tags of a given page are listed, e.g. "Tags: programming, python")
+            the words after which the tags of a given page are listed (e.g. "Tags: programming, python")
 
 
         """
@@ -118,7 +118,10 @@ class Tag:
             #  items is a list of files associated with this tag
             for item in items:
                 # We want here the filepath relative to /docs/_tags
-                relpath = item.filepath.relative_to(srcdir).as_posix()
+                # pathlib does not support relative paths for two absolute paths
+                relpath = Path(
+                    os.path.relpath(item.filepath, srcdir)
+                ).as_posix()
                 content.append(f"../{relpath}")
             content.append("```")
         else:
@@ -134,7 +137,10 @@ class Tag:
             #  items is a list of files associated with this tag
             for item in sorted(items, key=lambda i: i.filepath):
                 # We want here the filepath relative to /docs/_tags
-                relpath = item.filepath.relative_to(srcdir).as_posix()
+                # pathlib does not support relative paths for two absolute paths
+                relpath = Path(
+                    os.path.relpath(item.filepath, srcdir)
+                ).as_posix()
                 content.append(f"    ../{relpath}")
 
         content.append("")
@@ -148,7 +154,7 @@ class Entry:
     """Extracted info from source file (*.rst/*.md)"""
 
     def __init__(self, entrypath):
-        self.filepath = entrypath
+        self.filepath = Path(entrypath)
         with open(self.filepath, "r", encoding="utf8") as f:
             self.lines = f.read().split("\n")
         if self.filepath.name.endswith(".rst"):
@@ -225,8 +231,10 @@ def assign_entries(app):
     pages = []
     tags = {}
     result = []
+    # glob(pattern, recursive=True) includes the detected srcdir with any
+    # additional symlinked files/dirs (see issue gh-28)
     for extension in app.config.tags_extension:
-        result.extend(list(Path(app.srcdir).rglob(f"*.{extension}")))
+        result.extend(glob(f"{app.srcdir}/**/*.{extension}", recursive=True))
     for entrypath in result:
         entry = Entry(entrypath)
         entry.assign_to_tags(tags)
@@ -236,6 +244,7 @@ def assign_entries(app):
 
 def update_tags(app):
     """Update tags according to pages found"""
+
     if app.config.tags_create_tags:
 
         tags_output_dir = Path(app.config.tags_output_dir)
@@ -258,6 +267,7 @@ def update_tags(app):
                 app.config.tags_page_title,
                 app.config.tags_page_header,
             )
+
         # Create tags overview page
         tagpage(
             tags,
@@ -269,7 +279,8 @@ def update_tags(app):
         logger.info("Tags updated", color="white")
     else:
         logger.info(
-            "Tags were not created (tags_create_tags=False in conf.py)", color="white"
+            "Tags were not created (tags_create_tags=False in conf.py)",
+            color="white"
         )
 
 
