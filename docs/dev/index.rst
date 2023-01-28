@@ -1,7 +1,7 @@
+.. tags:: development
+
 Contribute
 ==========
-
-.. tags:: development
 
 All contributions are welcome in ``sphinx-tags``! All contributors and
 maintainers are expected to follow the `PSF Code of Conduct

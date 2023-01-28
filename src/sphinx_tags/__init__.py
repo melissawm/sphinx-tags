@@ -73,6 +73,10 @@ class TagLinks(SphinxDirective):
         """Get a sphinx-design reference badge for the given tag"""
         from sphinx_design.badges_buttons import XRefBadgeRole
 
+        # Required to set Inliner state, since we're directly creating a role object.
+        # Typically this would be done when parsing the role from document text.
+        text_nodes, messages = self.state.inline_text("", self.lineno)
+
         # Ref paths always use forward slashes, even on Windows
         tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{tag}>"
         tag_color = self._get_tag_color(tag)
