@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath("../src"))
 # -- Project information -----------------------------------------------------
 
 project = "sphinx-tags"
-copyright = "2023, melissawm"
-author = "melissawm"
+copyright = "2023, sphinx-tags developers"
+author = "sphinx-tags developers"
 
 # The full version, including alpha/beta/rc tags
 release = __version__
@@ -33,8 +33,8 @@ release = __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_tags",
     "sphinx_design",
+    "sphinx_tags",
     "myst_parser",
 ]
 
@@ -63,7 +63,12 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-
+html_logo = "images/tag_icon.svg"
+html_theme_options = {
+    "logo": {
+        "text": "sphinx-tags",
+    }
+}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
