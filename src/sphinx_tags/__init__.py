@@ -119,9 +119,7 @@ class Tag:
             for item in items:
                 # We want here the filepath relative to /docs/_tags
                 # pathlib does not support relative paths for two absolute paths
-                relpath = Path(
-                    os.path.relpath(item.filepath, srcdir)
-                ).as_posix()
+                relpath = Path(os.path.relpath(item.filepath, srcdir)).as_posix()
                 content.append(f"../{relpath}")
             content.append("```")
         else:
@@ -138,9 +136,7 @@ class Tag:
             for item in sorted(items, key=lambda i: i.filepath):
                 # We want here the filepath relative to /docs/_tags
                 # pathlib does not support relative paths for two absolute paths
-                relpath = Path(
-                    os.path.relpath(item.filepath, srcdir)
-                ).as_posix()
+                relpath = Path(os.path.relpath(item.filepath, srcdir)).as_posix()
                 content.append(f"    ../{relpath}")
 
         content.append("")
@@ -279,8 +275,7 @@ def update_tags(app):
         logger.info("Tags updated", color="white")
     else:
         logger.info(
-            "Tags were not created (tags_create_tags=False in conf.py)",
-            color="white"
+            "Tags were not created (tags_create_tags=False in conf.py)", color="white"
         )
 
 
