@@ -281,7 +281,6 @@ def update_tags(app):
     """Update tags according to pages found"""
 
     if app.config.tags_create_tags:
-
         tags_output_dir = Path(app.config.tags_output_dir)
 
         if not os.path.exists(os.path.join(app.srcdir, tags_output_dir)):
