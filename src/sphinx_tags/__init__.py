@@ -199,10 +199,12 @@ class Entry:
             tagstart = "```{tags}"
             tagend = "```"
         elif self.filepath.name.endswith(".ipynb"):
-            tagstart = "\".. tags::"
-            tagend = "\""
+            tagstart = '".. tags::'
+            tagend = '"'
         else:
-            raise ValueError("Unknown file extension. Currently, only .rst .md .ipynb are supported.")
+            raise ValueError(
+                "Unknown file extension. Currently, only .rst .md .ipynb are supported."
+            )
         tagline = [line for line in self.lines if tagstart in line]
         self.tags = []
         if tagline:
