@@ -198,6 +198,11 @@ class Entry:
         elif self.filepath.name.endswith(".md"):
             tagstart = "```{tags}"
             tagend = "```"
+        elif self.filepath.name.endswith(".ipynb"):
+            tagstart = ".. tags::"
+            tagend = ""
+        else:
+            raise ValueError("Unknown file extension")
         tagline = [line for line in self.lines if tagstart in line]
         self.tags = []
         if tagline:
