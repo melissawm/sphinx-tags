@@ -15,7 +15,7 @@ documentation.
 
    quickstart
    configuration
-   examples.md
+   examples/index
    dev/index
 
 .. toctree::

@@ -11,7 +11,7 @@ from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
-__version__ = "0.2.0"
+__version__ = "0.2.1dev"
 
 logger = getLogger("sphinx-tags")
 
@@ -186,7 +186,7 @@ class Tag:
 
 
 class Entry:
-    """Extracted info from source file (*.rst/*.md)"""
+    """Extracted info from source file (*.rst/*.md/*.ipynb)"""
 
     def __init__(self, entrypath):
         self.filepath = Path(entrypath)
@@ -198,6 +198,13 @@ class Entry:
         elif self.filepath.name.endswith(".md"):
             tagstart = "```{tags}"
             tagend = "```"
+        elif self.filepath.name.endswith(".ipynb"):
+            tagstart = '".. tags::'
+            tagend = '"'
+        else:
+            raise ValueError(
+                "Unknown file extension. Currently, only .rst, .md .ipynb are supported."
+            )
         tagline = [line for line in self.lines if tagstart in line]
         self.tags = []
         if tagline:
