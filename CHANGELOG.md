@@ -15,3 +15,7 @@
 - Added optional integration with sphinx-design badges [gh-35](https://github.com/melissawm/sphinx-tags/pull/35)
 - Added support for symlinked sources [gh-37](https://github.com/melissawm/sphinx-tags/pull/37)
 - Documentation improvements [gh-41](https://github.com/melissawm/sphinx-tags/pull/41)
+
+## Version 0.2.1 (June 28, 2023)
+
+- Added support for tagging Jupyter Notebooks using `nbsphinx` [gh-51](https://github.com/melissawm/sphinx-tags/pull/51)
