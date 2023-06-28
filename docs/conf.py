@@ -32,7 +32,7 @@ release = __version__
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx_design", "sphinx_tags", "myst_nb"]
+extensions = ["sphinx_design", "sphinx_tags", "nbsphinx", "myst_parser"]
 
 tags_create_tags = True
 tags_create_badges = True

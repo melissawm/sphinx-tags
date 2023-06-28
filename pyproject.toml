@@ -24,7 +24,8 @@ dependencies = [
 sphinx = [
     "pydata-sphinx-theme",
     "sphinx-design",
-    "myst-nb",
+    "nbsphinx",
+    "myst-parser"
 ]
 
 [project.urls]
