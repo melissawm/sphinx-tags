@@ -11,7 +11,7 @@ from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 
-__version__ = "0.2.1dev"
+__version__ = "0.2.1"
 
 logger = getLogger("sphinx-tags")
 
