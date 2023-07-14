@@ -34,7 +34,10 @@ class TagLinks(SphinxDirective):
     separator = ","
 
     def run(self):
-        tags = [arg.replace(self.separator, "") for arg in self.arguments]
+        # Undo splitting args by whitespace, and use our own separator (to support tags with spaces)
+        tags = " ".join(self.arguments).split(self.separator)
+        tags = [t.strip() for t in tags]
+
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
         result["classes"] = ["tags"]
