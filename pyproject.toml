@@ -17,7 +17,6 @@ keywords = [
 
 dependencies = [
     "sphinx>4",
-    "pre-commit",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +25,11 @@ sphinx = [
     "sphinx-design",
     "nbsphinx",
     "myst-parser"
+]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "pre-commit"
 ]
 
 [project.urls]
