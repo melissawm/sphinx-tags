@@ -33,7 +33,7 @@ def test_tag_pages(app: SphinxTestApp, status: StringIO, warning: StringIO) -> N
     assert "build succeeded" in status.getvalue()
     assert not warning.getvalue().strip()
 
-    for tag in ["tag_1", "tag2", "tag-3", "tag-4", "tag_5"]:
+    for tag in ["tag_1", "tag2", "tag-3", "tag-4", "tag_5", "test-tag-please-ignore"]:
         contents = (build_dir / "_tags" / f"{tag}.txt").read_text()
         expected_contents = (
             OUTPUT_ROOT_DIR / "test1" / "_tags" / f"{tag}.txt"

@@ -30,3 +30,7 @@ Test document
   * tag_5 (1)
 
     * Page 2
+
+  * {{🧪test tag; please ignore🧪}} (1)
+
+    * Page 2
