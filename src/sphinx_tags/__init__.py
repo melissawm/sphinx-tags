@@ -155,6 +155,9 @@ class Tag:
 
 
         """
+        # Get sorted file paths for tag pages, relative to /docs/_tags
+        tag_page_paths = sorted(i.relpath(srcdir) for i in items)
+
         content = []
         if "md" in extension:
             filename = f"{self.file_basename}.md"
@@ -165,12 +168,8 @@ class Tag:
             content.append("maxdepth: 1")
             content.append(f"caption: {tags_page_header}")
             content.append("---")
-            #  items is a list of files associated with this tag
-            for item in items:
-                # We want here the filepath relative to /docs/_tags
-                # pathlib does not support relative paths for two absolute paths
-                relpath = Path(os.path.relpath(item.filepath, srcdir)).as_posix()
-                content.append(f"../{relpath}")
+            for path in tag_page_paths:
+                content.append(f"../{path}")
             content.append("```")
         else:
             filename = f"{self.file_basename}.rst"
@@ -183,12 +182,8 @@ class Tag:
             content.append("    :maxdepth: 1")
             content.append(f"    :caption: {tags_page_header}")
             content.append("")
-            #  items is a list of files associated with this tag
-            for item in sorted(items, key=lambda i: i.filepath):
-                # We want here the filepath relative to /docs/_tags
-                # pathlib does not support relative paths for two absolute paths
-                relpath = Path(os.path.relpath(item.filepath, srcdir)).as_posix()
-                content.append(f"    ../{relpath}")
+            for path in tag_page_paths:
+                content.append(f"    ../{path}")
 
         content.append("")
         with open(
@@ -229,6 +224,10 @@ class Entry:
             if tag not in tag_dict:
                 tag_dict[tag] = Tag(tag)
             tag_dict[tag].items.append(self)
+
+    def relpath(self, root_dir) -> str:
+        """Get this entry's path relative to the given root directory"""
+        return Path(os.path.relpath(self.filepath, root_dir)).as_posix()
 
 
 def _normalize_tag(tag: str) -> str:
