@@ -16,6 +16,7 @@ def run_all_formats():
         [
             pytest.param(marks=pytest.mark.sphinx("text", testroot="myst")),
             pytest.param(marks=pytest.mark.sphinx("text", testroot="rst")),
+            pytest.param(marks=pytest.mark.sphinx("text", testroot="symlink")),
         ],
     )
 
