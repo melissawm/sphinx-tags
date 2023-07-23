@@ -7,15 +7,21 @@ Test document
 
 * Page 2
 
+* Subdir
+
+  * Page 3
+
 * Tags overview
 
   * [{(tag   4)}] (1)
 
     * Page 1
 
-  * tag 3 (1)
+  * tag 3 (2)
 
     * Page 1
+
+    * Page 3
 
   * tag2 (1)
 
