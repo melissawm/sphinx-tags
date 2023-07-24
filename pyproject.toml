@@ -27,6 +27,7 @@ sphinx = [
     "myst-parser"
 ]
 dev = [
+    "bs4",
     "pytest>=6.0",
     "pytest-cov",
     "pre-commit"
