@@ -4,13 +4,13 @@
 import os
 import re
 from fnmatch import fnmatch
-from glob import glob
 from pathlib import Path
 from typing import List
 
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
+from sphinx.util.matching import get_matching_files
 from sphinx.util.rst import textwidth
 
 __version__ = "0.2.1"
@@ -200,17 +200,16 @@ class Tag:
 class Entry:
     """Extracted info from source file (*.rst/*.md/*.ipynb)"""
 
-    def __init__(self, entrypath):
-        self.filepath = Path(entrypath)
-        with open(self.filepath, "r", encoding="utf8") as f:
-            self.lines = f.read().split("\n")
-        if self.filepath.name.endswith(".rst"):
+    def __init__(self, entrypath: Path):
+        self.filepath = entrypath
+        self.lines = self.filepath.read_text(encoding="utf8").split("\n")
+        if self.filepath.suffix == ".rst":
             tagstart = ".. tags::"
             tagend = ""
-        elif self.filepath.name.endswith(".md"):
+        elif self.filepath.suffix == ".md":
             tagstart = "```{tags}"
             tagend = "```"
-        elif self.filepath.name.endswith(".ipynb"):
+        elif self.filepath.suffix == ".ipynb":
             tagstart = '".. tags::'
             tagend = '"'
         else:
@@ -295,15 +294,19 @@ def assign_entries(app):
     """Assign all found entries to their tag."""
     pages = []
     tags = {}
-    result = []
-    # glob(pattern, recursive=True) includes the detected srcdir with any
-    # additional symlinked files/dirs (see issue gh-28)
-    for extension in app.config.tags_extension:
-        result.extend(glob(f"{app.srcdir}/**/*.{extension}", recursive=True))
-    for entrypath in result:
-        entry = Entry(entrypath)
+
+    # Get document paths in the project that match specified file extensions
+    doc_paths = get_matching_files(
+        app.srcdir,
+        include_patterns=[f"**.{extension}" for extension in app.config.tags_extension],
+        exclude_patterns=app.config.exclude_patterns,
+    )
+
+    for path in doc_paths:
+        entry = Entry(Path(app.srcdir) / path)
         entry.assign_to_tags(tags)
         pages.append(entry)
+
     return tags, pages
 
 
