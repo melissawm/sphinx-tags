@@ -11,6 +11,7 @@ from typing import List
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
+from sphinx.util.rst import textwidth
 
 __version__ = "0.2.1"
 
@@ -173,8 +174,9 @@ class Tag:
             content.append("```")
         else:
             filename = f"{self.file_basename}.rst"
-            content.append(f"{tags_page_title}: {self.name}")
-            content.append("#" * (len(self.name) + len(tags_page_title) + 2))
+            header = f"{tags_page_title}: {self.name}"
+            content.append(header)
+            content.append("#" * textwidth(header))
             content.append("")
             #  Return link block at the start of the page"""
             content.append(".. toctree::")
@@ -271,7 +273,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append(".. _tagoverview:")
         content.append("")
         content.append(title)
-        content.append("#" * len(title))
+        content.append("#" * textwidth(title))
         content.append("")
         # toctree for the page
         content.append(".. toctree::")
