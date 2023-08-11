@@ -9,8 +9,6 @@ from sphinx.testing.util import SphinxTestApp
 OUTPUT_DIR = OUTPUT_ROOT_DIR / "general"
 
 
-# TODO: ipynb tests are currently failing because _build/doctrees/nbsphinx/*.ipynb files are
-# getting included
 def run_all_formats():
     """Return a decorator that runs a test in all supported markup formats"""
     return pytest.mark.parametrize(
