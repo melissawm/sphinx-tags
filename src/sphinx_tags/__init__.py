@@ -27,14 +27,15 @@ class TagLinks(SphinxDirective):
 
     # Sphinx directive class attributes
     required_arguments = 1
-    optional_arguments = 200  # Arbitrary.
+    optional_arguments = 0
     has_content = False
+    final_argument_whitespace = True
 
     # Custom attributes
     separator = ","
 
     def run(self):
-        tags = [arg.replace(self.separator, "") for arg in self.arguments]
+        tags = [arg.strip() for arg in self.arguments[0].split(self.separator)]
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
         result["classes"] = ["tags"]
@@ -66,7 +67,7 @@ class TagLinks(SphinxDirective):
 
     def _get_plaintext_node(self, tag: str, relative_tag_dir: Path) -> List[nodes.Node]:
         """Get a plaintext reference link for the given tag"""
-        link = relative_tag_dir / f"{tag}.html"
+        link = relative_tag_dir / f"{tag.replace(' ', '_')}.html"
         return nodes.reference(refuri=str(link), text=tag)
 
     def _get_badge_node(self, tag: str, relative_tag_dir: Path) -> List[nodes.Node]:
@@ -78,7 +79,7 @@ class TagLinks(SphinxDirective):
         text_nodes, messages = self.state.inline_text("", self.lineno)
 
         # Ref paths always use forward slashes, even on Windows
-        tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{tag}>"
+        tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{tag.replace(' ', '_')}>"
         tag_color = self._get_tag_color(tag)
         tag_badge = XRefBadgeRole(tag_color)
         return tag_badge(
@@ -146,7 +147,7 @@ class Tag:
         """
         content = []
         if "md" in extension:
-            filename = f"{self.name}.md"
+            filename = f"{self.name.replace(' ', '_')}.md"
             content.append(f"# {tags_page_title}: {self.name}")
             content.append("")
             content.append("```{toctree}")
@@ -162,7 +163,7 @@ class Tag:
                 content.append(f"../{relpath}")
             content.append("```")
         else:
-            filename = f"{self.name}.rst"
+            filename = f"{self.name.replace(' ', '_')}.rst"
             content.append(f"{tags_page_title}: {self.name}")
             content.append("#" * (len(self.name) + len(tags_page_title) + 2))
             content.append("")
@@ -241,7 +242,8 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append("maxdepth: 1")
         content.append("---")
         for tag in sorted(tags, key=lambda t: t.name):
-            content.append(f"{tag.name} ({len(tag.items)}) <{tag.name}>")
+            link = tag.name.replace(" ", "_")
+            content.append(f"{tag.name} ({len(tag.items)}) <{link}>")
         content.append("```")
         content.append("")
         filename = os.path.join(outdir, "tagsindex.md")
@@ -260,7 +262,8 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append("    :maxdepth: 1")
         content.append("")
         for tag in sorted(tags, key=lambda t: t.name):
-            content.append(f"    {tag.name} ({len(tag.items)}) <{tag.name}.rst>")
+            link = tag.name.replace(" ", "_")
+            content.append(f"    {tag.name} ({len(tag.items)}) <{link}.rst>")
         content.append("")
         filename = os.path.join(outdir, "tagsindex.rst")
 
