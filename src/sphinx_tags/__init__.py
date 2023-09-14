@@ -2,6 +2,7 @@
 
 """
 import os
+import re
 from fnmatch import fnmatch
 from glob import glob
 from pathlib import Path
@@ -188,30 +189,29 @@ class Tag:
 
 class Entry:
     """Extracted info from source file (*.rst/*.md/*.ipynb)"""
+    _rst_regex = re.compile(r"(?:^|\n)\.\. tags::(.*?)(?=\n\n|$)", re.DOTALL)
+    _md_regex = re.compile(r"```{tags}(.*?)```", re.DOTALL)
+    # TODO: Handle multiline 'tags' directives in .ipynb files
+    _nb_regex = re.compile(r'"\.\. tags::(.*)\\n"')
 
     def __init__(self, entrypath):
         self.filepath = Path(entrypath)
         with open(self.filepath, "r", encoding="utf8") as f:
             self.lines = f.read().split("\n")
         if self.filepath.name.endswith(".rst"):
-            tagstart = ".. tags::"
-            tagend = ""
+            tag_regex = self._rst_regex
         elif self.filepath.name.endswith(".md"):
-            tagstart = "```{tags}"
-            tagend = "```"
+            tag_regex = self._md_regex
         elif self.filepath.name.endswith(".ipynb"):
-            tagstart = '".. tags::'
-            tagend = '"'
+            tag_regex = self._nb_regex
         else:
             raise ValueError(
                 "Unknown file extension. Currently, only .rst, .md .ipynb are supported."
             )
-        tagline = [line for line in self.lines if tagstart in line]
+
         self.tags = []
-        if tagline:
-            tagline = tagline[0].replace(tagstart, "").rstrip(tagend)
-            self.tags = tagline.split(",")
-            self.tags = [tag.strip() for tag in self.tags]
+        for match in tag_regex.finditer("\n".join(self.lines)):
+            self.tags.extend(tag.strip() for tag in match.group(1).split(","))
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
