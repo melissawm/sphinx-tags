@@ -2,16 +2,18 @@
 
 """
 import os
+import re
 from fnmatch import fnmatch
-from glob import glob
 from pathlib import Path
 from typing import List
 
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
+from sphinx.util.matching import get_matching_files
+from sphinx.util.rst import textwidth
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 logger = getLogger("sphinx-tags")
 
@@ -34,7 +36,10 @@ class TagLinks(SphinxDirective):
     separator = ","
 
     def run(self):
-        tags = [arg.replace(self.separator, "") for arg in self.arguments]
+        # Undo splitting args by whitespace, and use our own separator (to support tags with spaces)
+        tags = " ".join(self.arguments).split(self.separator)
+        tags = [t.strip() for t in tags]
+
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
         result["classes"] = ["tags"]
@@ -53,23 +58,28 @@ class TagLinks(SphinxDirective):
             #    - current_doc_path
             current_doc_dir = Path(self.env.doc2path(self.env.docname)).parent
             relative_tag_dir = Path(os.path.relpath(tag_dir, current_doc_dir))
+            file_basename = _normalize_tag(tag)
 
             if self.env.app.config.tags_create_badges:
-                result += self._get_badge_node(tag, relative_tag_dir)
+                result += self._get_badge_node(tag, file_basename, relative_tag_dir)
                 tag_separator = " "
             else:
-                result += self._get_plaintext_node(tag, relative_tag_dir)
+                result += self._get_plaintext_node(tag, file_basename, relative_tag_dir)
                 tag_separator = f"{self.separator} "
             if not count == len(tags):
                 result += nodes.inline(text=tag_separator)
         return [result]
 
-    def _get_plaintext_node(self, tag: str, relative_tag_dir: Path) -> List[nodes.Node]:
+    def _get_plaintext_node(
+        self, tag: str, file_basename: str, relative_tag_dir: Path
+    ) -> List[nodes.Node]:
         """Get a plaintext reference link for the given tag"""
-        link = relative_tag_dir / f"{tag}.html"
+        link = relative_tag_dir / f"{file_basename}.html"
         return nodes.reference(refuri=str(link), text=tag)
 
-    def _get_badge_node(self, tag: str, relative_tag_dir: Path) -> List[nodes.Node]:
+    def _get_badge_node(
+        self, tag: str, file_basename: str, relative_tag_dir: Path
+    ) -> List[nodes.Node]:
         """Get a sphinx-design reference badge for the given tag"""
         from sphinx_design.badges_buttons import XRefBadgeRole
 
@@ -78,7 +88,7 @@ class TagLinks(SphinxDirective):
         text_nodes, messages = self.state.inline_text("", self.lineno)
 
         # Ref paths always use forward slashes, even on Windows
-        tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{tag}>"
+        tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{file_basename}>"
         tag_color = self._get_tag_color(tag)
         tag_badge = XRefBadgeRole(tag_color)
         return tag_badge(
@@ -104,8 +114,9 @@ class Tag:
     """A tag contains entries"""
 
     def __init__(self, name):
-        self.name = name
         self.items = []
+        self.name = name
+        self.file_basename = _normalize_tag(name)
 
     def create_file(
         self,
@@ -144,9 +155,12 @@ class Tag:
 
 
         """
+        # Get sorted file paths for tag pages, relative to /docs/_tags
+        tag_page_paths = sorted(i.relpath(srcdir) for i in items)
+
         content = []
         if "md" in extension:
-            filename = f"{self.name}.md"
+            filename = f"{self.file_basename}.md"
             content.append(f"# {tags_page_title}: {self.name}")
             content.append("")
             content.append("```{toctree}")
@@ -154,29 +168,22 @@ class Tag:
             content.append("maxdepth: 1")
             content.append(f"caption: {tags_page_header}")
             content.append("---")
-            #  items is a list of files associated with this tag
-            for item in items:
-                # We want here the filepath relative to /docs/_tags
-                # pathlib does not support relative paths for two absolute paths
-                relpath = Path(os.path.relpath(item.filepath, srcdir)).as_posix()
-                content.append(f"../{relpath}")
+            for path in tag_page_paths:
+                content.append(f"../{path}")
             content.append("```")
         else:
-            filename = f"{self.name}.rst"
-            content.append(f"{tags_page_title}: {self.name}")
-            content.append("#" * (len(self.name) + len(tags_page_title) + 2))
+            filename = f"{self.file_basename}.rst"
+            header = f"{tags_page_title}: {self.name}"
+            content.append(header)
+            content.append("#" * textwidth(header))
             content.append("")
             #  Return link block at the start of the page"""
             content.append(".. toctree::")
             content.append("    :maxdepth: 1")
             content.append(f"    :caption: {tags_page_header}")
             content.append("")
-            #  items is a list of files associated with this tag
-            for item in sorted(items, key=lambda i: i.filepath):
-                # We want here the filepath relative to /docs/_tags
-                # pathlib does not support relative paths for two absolute paths
-                relpath = Path(os.path.relpath(item.filepath, srcdir)).as_posix()
-                content.append(f"    ../{relpath}")
+            for path in tag_page_paths:
+                content.append(f"    ../{path}")
 
         content.append("")
         with open(
@@ -188,17 +195,16 @@ class Tag:
 class Entry:
     """Extracted info from source file (*.rst/*.md/*.ipynb)"""
 
-    def __init__(self, entrypath):
-        self.filepath = Path(entrypath)
-        with open(self.filepath, "r", encoding="utf8") as f:
-            self.lines = f.read().split("\n")
-        if self.filepath.name.endswith(".rst"):
+    def __init__(self, entrypath: Path):
+        self.filepath = entrypath
+        self.lines = self.filepath.read_text(encoding="utf8").split("\n")
+        if self.filepath.suffix == ".rst":
             tagstart = ".. tags::"
             tagend = ""
-        elif self.filepath.name.endswith(".md"):
+        elif self.filepath.suffix == ".md":
             tagstart = "```{tags}"
             tagend = "```"
-        elif self.filepath.name.endswith(".ipynb"):
+        elif self.filepath.suffix == ".ipynb":
             tagstart = '".. tags::'
             tagend = '"'
         else:
@@ -218,6 +224,19 @@ class Entry:
             if tag not in tag_dict:
                 tag_dict[tag] = Tag(tag)
             tag_dict[tag].items.append(self)
+
+    def relpath(self, root_dir) -> str:
+        """Get this entry's path relative to the given root directory"""
+        return Path(os.path.relpath(self.filepath, root_dir)).as_posix()
+
+
+def _normalize_tag(tag: str) -> str:
+    """Normalize a tag name to use in output filenames and tag URLs.
+    Replace whitespace and other non-alphanumeric characters with dashes.
+
+    Example: 'Tag:with (special   characters) ' -> 'tag-with-special-characters'
+    """
+    return re.sub(r"[\s\W]+", "-", tag).lower().strip("-")
 
 
 def tagpage(tags, outdir, title, extension, tags_index_head):
@@ -241,7 +260,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append("maxdepth: 1")
         content.append("---")
         for tag in sorted(tags, key=lambda t: t.name):
-            content.append(f"{tag.name} ({len(tag.items)}) <{tag.name}>")
+            content.append(f"{tag.name} ({len(tag.items)}) <{tag.file_basename}>")
         content.append("```")
         content.append("")
         filename = os.path.join(outdir, "tagsindex.md")
@@ -252,7 +271,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append(".. _tagoverview:")
         content.append("")
         content.append(title)
-        content.append("#" * len(title))
+        content.append("#" * textwidth(title))
         content.append("")
         # toctree for the page
         content.append(".. toctree::")
@@ -260,7 +279,9 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         content.append("    :maxdepth: 1")
         content.append("")
         for tag in sorted(tags, key=lambda t: t.name):
-            content.append(f"    {tag.name} ({len(tag.items)}) <{tag.name}.rst>")
+            content.append(
+                f"    {tag.name} ({len(tag.items)}) <{tag.file_basename}.rst>"
+            )
         content.append("")
         filename = os.path.join(outdir, "tagsindex.rst")
 
@@ -272,15 +293,19 @@ def assign_entries(app):
     """Assign all found entries to their tag."""
     pages = []
     tags = {}
-    result = []
-    # glob(pattern, recursive=True) includes the detected srcdir with any
-    # additional symlinked files/dirs (see issue gh-28)
-    for extension in app.config.tags_extension:
-        result.extend(glob(f"{app.srcdir}/**/*.{extension}", recursive=True))
-    for entrypath in result:
-        entry = Entry(entrypath)
+
+    # Get document paths in the project that match specified file extensions
+    doc_paths = get_matching_files(
+        app.srcdir,
+        include_patterns=[f"**.{extension}" for extension in app.config.tags_extension],
+        exclude_patterns=app.config.exclude_patterns,
+    )
+
+    for path in doc_paths:
+        entry = Entry(Path(app.srcdir) / path)
         entry.assign_to_tags(tags)
         pages.append(entry)
+
     return tags, pages
 
 

@@ -19,3 +19,10 @@
 ## Version 0.2.1 (June 28, 2023)
 
 - Added support for tagging Jupyter Notebooks using `nbsphinx` [gh-51](https://github.com/melissawm/sphinx-tags/pull/51)
+
+## Version 0.3.0
+
+- Fixed tag labels with spaces
+- Fixed tag labels with emoji
+- Added normalization for tag URLs to remove/replace urlencoded characters
+- Exclude files that match `exclude_patterns` from being tagged
