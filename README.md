@@ -25,26 +25,6 @@ Refer to the [documentation](https://sphinx-tags.readthedocs.io/en/latest/) for 
 
 Feel free to submit issues or PRs - keep in mind this project is experimental!
 
-### Setup for development
-
-After cloning this repo and activating a virtual environment manager such as
-`venv` or `conda`, use
-
-```
-python -m pip install -e ".[sphinx]"
-```
-
-To build the documentation locally, use
-
-```
-sphinx-build docs docs/_build/html
-```
-
-`sphinx-tags` uses [pre-commit](https://pre-commit.com/), and code is formatted
-according to [black](https://github.com/psf/black)
-
-### Contribution guide
-
 If you want to submit Pull requests to this repository, please follow the [contribution guidelines](https://sphinx-tags.readthedocs.io/en/latest/dev/index.html).
 
 ## Code of Conduct

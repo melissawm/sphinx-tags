@@ -99,3 +99,9 @@ You may also use glob patterns to match multiple tags::
 
 This will result in badges like this:
 :bdg-primary:`tag_1` :bdg-primary:`tag_2` :bdg-warning:`status:done` :bdg-dark:`other`
+
+Special characters
+------------------
+
+Tags can contain spaces and special characters such as emoji. In that case, the
+tag will be normalized when processed. See our :doc:`examples/examples` for more details.

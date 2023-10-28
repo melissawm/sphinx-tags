@@ -40,7 +40,7 @@ tags_create_badges = True
 tags_overview_title = "All tags"  # default: "Tags overview"
 tags_extension = ["rst", "md", "ipynb"]  # default: ["rst"]
 tags_intro_text = "Tags in this page:"  # default: "Tags:"
-tags_page_title = "All tags"  # default: "My tags:"
+tags_page_title = "Tag"  # default: "My tags:"
 tags_page_header = "Pages with this tag"  # default: "With this tag"
 tags_index_head = "Tags in this site"  # default: "Tags"
 
@@ -68,7 +68,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+# html_static_path = ["_static"]
 
 # html_sidebars = {
 #     "**": ["search-field.html", "sidebar-nav-bs.html", "sidebar-tags.html"],
