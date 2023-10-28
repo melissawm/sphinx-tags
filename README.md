@@ -40,6 +40,11 @@ To build the documentation locally, use
 sphinx-build docs docs/_build/html
 ```
 
+To run tests, use
+```
+pytest
+```
+
 `sphinx-tags` uses [pre-commit](https://pre-commit.com/), and code is formatted
 according to [black](https://github.com/psf/black)
 
