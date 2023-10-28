@@ -58,6 +58,11 @@ Pull request guidelines
    `conftest.py <https://github.com/melissawm/sphinx-tags/tree/main/test/conftest.py>`__
    for details on testing setup.
 
+   To run tests, use
+   ```
+   pytest
+   ```
+
 5. **Commit your changes and send your pull request as usual.**
 
 Releases
