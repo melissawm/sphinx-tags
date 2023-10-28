@@ -54,9 +54,9 @@ Pull request guidelines
 
 4. **Test Coverage**
 
-    For any new or changed behavior, please add unit test coverage. See notes in
-    `conftest.py <https://github.com/melissawm/sphinx-tags/tree/main/test/conftest.py>`__
-    for details on testing setup.
+   For any new or changed behavior, please add unit test coverage. See notes in
+   `conftest.py <https://github.com/melissawm/sphinx-tags/tree/main/test/conftest.py>`__
+   for details on testing setup.
 
 5. **Commit your changes and send your pull request as usual.**
 
