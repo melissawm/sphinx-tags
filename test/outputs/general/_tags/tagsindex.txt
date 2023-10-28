@@ -1,0 +1,18 @@
+Tags overview
+*************
+
+
+Tags
+^^^^
+
+* [{(tag   4)}] (1)
+
+* tag 3 (2)
+
+* tag2 (1)
+
+* tag_1 (2)
+
+* tag_5 (1)
+
+* {{🧪test tag; please ignore🧪}} (1)

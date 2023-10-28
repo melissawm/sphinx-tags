@@ -1,0 +1,42 @@
+Test Doc
+********
+
+Test document
+
+* Page 1
+
+* Page 2
+
+* Subdir
+
+  * Page 3
+
+* Tags overview
+
+  * [{(tag   4)}] (1)
+
+    * Page 1
+
+  * tag 3 (2)
+
+    * Page 1
+
+    * Page 3
+
+  * tag2 (1)
+
+    * Page 1
+
+  * tag_1 (2)
+
+    * Page 1
+
+    * Page 2
+
+  * tag_5 (1)
+
+    * Page 2
+
+  * {{🧪test tag; please ignore🧪}} (1)
+
+    * Page 2

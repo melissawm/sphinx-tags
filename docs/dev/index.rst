@@ -25,7 +25,7 @@ Pull request guidelines
 
    ::
 
-     python -m pip install -e ".[sphinx]"
+     python -m pip install -e ".[dev,sphinx]"
 
    To build the documentation locally, use
 
@@ -52,7 +52,13 @@ Pull request guidelines
    - Re-add any changed files to your staging area and run pre-commit again to
      make sure any fixes are applied to your code.
 
-4. **Commit your changes and send your pull request as usual.**
+4. **Test Coverage**
+
+    For any new or changed behavior, please add unit test coverage. See notes in
+    `conftest.py <https://github.com/melissawm/sphinx-tags/tree/main/test/conftest.py>`__
+    for details on testing setup.
+
+5. **Commit your changes and send your pull request as usual.**
 
 Releases
 --------
