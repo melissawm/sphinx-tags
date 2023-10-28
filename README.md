@@ -1,4 +1,4 @@
-# sphinx-tags [![sphinx-tags](https://circleci.com/gh/melissawm/sphinx-tags.svg?style=svg)](https://circleci.com/gh/melissawm/sphinx-tags)
+# sphinx-tags [![sphinx-tags](https://circleci.com/gh/melissawm/sphinx-tags.svg?style=svg)](https://circleci.com/gh/melissawm/sphinx-tags) ![Codecov](https://img.shields.io/codecov/c/github/melissawm/sphinx-tags)
 
 A tiny Sphinx extension that implements blog-style tags for documentation.
 
