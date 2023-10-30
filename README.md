@@ -25,7 +25,7 @@ Refer to the [documentation](https://sphinx-tags.readthedocs.io/en/latest/) for 
 
 Feel free to submit issues or PRs - keep in mind this project is experimental!
 
-If you want to submit Pull requests to this repository, please follow the [contribution guidelines](https://sphinx-tags.readthedocs.io/en/latest/dev/index.html).
+If you want to submit Pull requests to this repository, please follow the [contribution guidelines](https://sphinx-tags.readthedocs.io/en/latest/contribute/index.html).
 
 ## Code of Conduct
 
