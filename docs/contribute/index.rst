@@ -74,7 +74,10 @@ To cut a new release:
 
 1. Make sure the version string in ``src/sphinx_tags/__init__.py`` is updated
    with the release number you want.
-2. Run ``flit publish`` to upload your new version to PyPI.
-3. Run ``git tag <version>``, and ``git push origin --tags`` to update the tags
+2. Run ``git tag <version>``, and ``git push origin --tags`` to update the tags
    on GitHub.
-4. Make a new release using the GitHub interface.
+3. This will trigger a `GitHub Action <https://github.com/melissawm/sphinx-tags/actions>`__
+   that will build and publish the new release to PyPI. Verify that it completed
+   successfully.
+4. A new `GitHub release <https://github.com/melissawm/sphinx-tags/releases>`__
+   will be created automatically. Update the release description as needed.
