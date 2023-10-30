@@ -24,4 +24,5 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
-        body: "See [changelog](https://github.com/melissawm/sphinx-tags/blob/main/CHANGELOG.md) for release details."
+        with:
+          body: "See [changelog](https://github.com/melissawm/sphinx-tags/blob/main/CHANGELOG.md) for release details."
