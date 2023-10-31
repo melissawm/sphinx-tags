@@ -16,7 +16,7 @@ keywords = [
 ]
 
 dependencies = [
-    "sphinx>5",
+    "sphinx>5.1",
 ]
 
 [project.optional-dependencies]
