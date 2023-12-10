@@ -38,6 +38,10 @@ To enable ``sphinx-tags`` in your documentation, enable the extension on your
        "sphinx_tags",
    ]
 
+Next, add the following configuration setting to ``conf.py``::
+
+   tags_create_tags = True
+
 To assign one or more tags to a page in the documentation, use
 
 .. code-block:: rst
