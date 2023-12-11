@@ -178,7 +178,7 @@ class Tag:
             content.append("#" * textwidth(header))
             content.append("")
             #  Return link block at the start of the page"""
-            content.append(f".. _sphx_tag_{self.file_basename}_{self.name}:")
+            content.append(f".. _sphx_tag_{self.file_basename}:")
             content.append(".. toctree::")
             content.append("    :maxdepth: 1")
             content.append(f"    :caption: {tags_page_header}")
