@@ -5,14 +5,14 @@ Tags overview
 Tags
 ^^^^
 
-* [{(tag 4)}] (1)
+* [{(tag 4)}] (2)
 
-* tag 3 (2)
+* tag 3 (3)
 
-* tag2 (1)
+* tag2 (2)
 
-* tag_1 (2)
+* tag_1 (3)
 
-* tag_5 (1)
+* tag_5 (2)
 
 * {{🧪test tag; please ignore🧪}} (1)
