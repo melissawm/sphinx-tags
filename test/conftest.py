@@ -15,7 +15,6 @@ from unittest.mock import patch
 
 import pytest
 import sphinx.testing
-import sphinx.testing.path
 
 collect_ignore = ["sources", "outputs"]
 pytest_plugins = "sphinx.testing.fixtures"
@@ -31,11 +30,15 @@ def rootdir():
     resolved and copied as files.
     """
 
-    def copytree(src, dest):
-        shutil.copytree(src, dest, symlinks=True)
+    # patch copytree into Path objects to have sphinx 5 compatibility and
+    class PatchedPath(type(Path())):
+        def __new__(cls, *pathsegments):
+            return super().__new__(cls, *pathsegments)
 
-    with patch.object(sphinx.testing.path.path, "copytree", copytree):
-        yield sphinx.testing.path.path(SOURCE_ROOT_DIR)
+        def copytree(src, dest):
+            shutil.copytree(src, dest, symlinks=True)
+
+    yield PatchedPath(SOURCE_ROOT_DIR)
 
 
 @pytest.fixture(scope="session", autouse=True)
