@@ -47,9 +47,9 @@ def create_symlinks():
     symlink_dest_dir = SOURCE_ROOT_DIR / "test-symlink"
 
     for file in SOURCE_ROOT_DIR.glob("test-rst/*.rst"):
-        symlink(file, symlink_dest_dir / file.name)
+        (symlink_dest_dir / file.name).symlink_to(file)
     for dir in SOURCE_ROOT_DIR.glob("test-rst/subdir*"):
-        symlink(dir, symlink_dest_dir / dir.name, target_is_directory=True)
+        (symlink_dest_dir / dir.name).symlink_to(dir, target_is_directory=True)
 
     yield
 

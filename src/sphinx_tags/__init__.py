@@ -3,15 +3,14 @@
 """
 import os
 import re
-from collections import defaultdict
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
 
 from docutils import nodes
+from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
-from sphinx.util.matching import get_matching_files
 from sphinx.util.rst import textwidth
 
 __version__ = "0.3.1"
@@ -29,16 +28,26 @@ class TagLinks(SphinxDirective):
     """
 
     # Sphinx directive class attributes
-    required_arguments = 1
-    optional_arguments = 200  # Arbitrary.
-    has_content = False
-
+    required_arguments = 0
+    optional_arguments = 1  # Arbitrary, split on seperator
+    final_argument_whitespace = True
+    has_content = True
+    final_argument_whitespace = True
     # Custom attributes
     separator = ","
 
     def run(self):
-        tagline = " ".join(self.arguments).split(self.separator)
-        tags = [tag.strip() for tag in tagline]
+        if not (self.arguments or self.content):
+            raise ExtensionError("No tags passed to 'tags' directive.")
+
+        tagline = []
+        # normalize white space and remove "\n"
+        if self.arguments:
+            tagline.extend(self.arguments[0].split())
+        if self.content:
+            tagline.extend((" ".join(self.content)).strip().split())
+
+        tags = [tag.strip() for tag in (" ".join(tagline)).split(self.separator)]
 
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
@@ -61,6 +70,7 @@ class TagLinks(SphinxDirective):
             #    - current_doc_path
 
             file_basename = _normalize_tag(tag)
+
             if self.env.app.config.tags_create_badges:
                 result += self._get_badge_node(tag, file_basename, relative_tag_dir)
                 tag_separator = " "
@@ -161,7 +171,7 @@ class Tag:
 
         """
         # Get sorted file paths for tag pages, relative to /docs/_tags
-        tag_page_paths = sorted(i.relpath(srcdir) for i in items)
+        tag_page_paths = sorted([i.relpath(srcdir) for i in items])
 
         content = []
         if "md" in extension:
@@ -288,6 +298,7 @@ def assign_entries(app):
         entry = Entry(app.env.doc2path(docname), doctags)
         entry.assign_to_tags(tags)
         pages.append(entry)
+
     return tags, pages
 
 

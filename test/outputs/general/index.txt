@@ -7,35 +7,47 @@ Test document
 
 * Page 2
 
+* Page 5
+
 * Subdir
 
   * Page 3
 
 * Tags overview
 
-  * [{(tag 4)}] (1)
+  * [{(tag 4)}] (2)
 
     * Page 1
 
-  * tag 3 (2)
+    * Page 5
+
+  * tag 3 (3)
 
     * Page 1
+
+    * Page 5
 
     * Page 3
 
-  * tag2 (1)
+  * tag2 (2)
 
     * Page 1
 
-  * tag_1 (2)
+    * Page 5
+
+  * tag_1 (3)
 
     * Page 1
 
     * Page 2
 
-  * tag_5 (1)
+    * Page 5
+
+  * tag_5 (2)
 
     * Page 2
+
+    * Page 5
 
   * {{🧪test tag; please ignore🧪}} (1)
 
