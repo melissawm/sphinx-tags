@@ -53,7 +53,9 @@ html output at the same position in the page as in the source .rst file.
 
 For each tag, a new rst file is created in ``<output_dir>/<tagname>.rst``
 containing a table of contents of each file associated with that tag (see
-:ref:`config`).
+:ref:`config`). A reference label will be added to this rst file, to enable you to
+cross-reference to it. The reference label will have the format: ``sphx_tag_<tagname>``
+e.g., a reference would look like: ``:ref:`sphx_tag_tag1```.
 
 A :ref:`tagoverview` page is also created that can be added to the index and
 show all tags defined for this documentation set.
