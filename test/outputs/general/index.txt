@@ -13,7 +13,7 @@ Test document
 
 * Tags overview
 
-  * [{(tag   4)}] (1)
+  * [{(tag 4)}] (1)
 
     * Page 1
 

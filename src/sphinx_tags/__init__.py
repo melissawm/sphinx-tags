@@ -3,6 +3,7 @@
 """
 import os
 import re
+from collections import defaultdict
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
@@ -36,15 +37,17 @@ class TagLinks(SphinxDirective):
     separator = ","
 
     def run(self):
-        # Undo splitting args by whitespace, and use our own separator (to support tags with spaces)
-        tags = " ".join(self.arguments).split(self.separator)
-        tags = [t.strip() for t in tags]
+        tagline = " ".join(self.arguments).split(self.separator)
+        tags = [tag.strip() for tag in tagline]
 
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
         result["classes"] = ["tags"]
         result += nodes.inline(text=f"{self.env.app.config.tags_intro_text} ")
         count = 0
+
+        current_doc_dir = Path(self.env.doc2path(self.env.docname)).parent
+        relative_tag_dir = Path(os.path.relpath(tag_dir, current_doc_dir))
 
         for tag in tags:
             count += 1
@@ -56,10 +59,8 @@ class TagLinks(SphinxDirective):
             #  - subfolder
             #   |
             #    - current_doc_path
-            current_doc_dir = Path(self.env.doc2path(self.env.docname)).parent
-            relative_tag_dir = Path(os.path.relpath(tag_dir, current_doc_dir))
-            file_basename = _normalize_tag(tag)
 
+            file_basename = _normalize_tag(tag)
             if self.env.app.config.tags_create_badges:
                 result += self._get_badge_node(tag, file_basename, relative_tag_dir)
                 tag_separator = " "
@@ -68,6 +69,10 @@ class TagLinks(SphinxDirective):
                 tag_separator = f"{self.separator} "
             if not count == len(tags):
                 result += nodes.inline(text=tag_separator)
+
+        # register tags to global metadata for document
+        self.env.metadata[self.env.docname]["tags"] = tags
+
         return [result]
 
     def _get_plaintext_node(
@@ -193,30 +198,11 @@ class Tag:
 
 
 class Entry:
-    """Extracted info from source file (*.rst/*.md/*.ipynb)"""
+    """Tags to pages map"""
 
-    def __init__(self, entrypath: Path):
+    def __init__(self, entrypath: Path, tags: list):
         self.filepath = entrypath
-        self.lines = self.filepath.read_text(encoding="utf8").split("\n")
-        if self.filepath.suffix == ".rst":
-            tagstart = ".. tags::"
-            tagend = ""
-        elif self.filepath.suffix == ".md":
-            tagstart = "```{tags}"
-            tagend = "```"
-        elif self.filepath.suffix == ".ipynb":
-            tagstart = '".. tags::'
-            tagend = '"'
-        else:
-            raise ValueError(
-                "Unknown file extension. Currently, only .rst, .md .ipynb are supported."
-            )
-        tagline = [line for line in self.lines if tagstart in line]
-        self.tags = []
-        if tagline:
-            tagline = tagline[0].replace(tagstart, "").rstrip(tagend)
-            self.tags = tagline.split(",")
-            self.tags = [tag.strip() for tag in self.tags]
+        self.tags = tags
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
@@ -245,6 +231,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
     This page contains a list of all available tags.
 
     """
+
     tags = list(tags.values())
 
     if "md" in extension:
@@ -294,24 +281,18 @@ def assign_entries(app):
     pages = []
     tags = {}
 
-    # Get document paths in the project that match specified file extensions
-    doc_paths = get_matching_files(
-        app.srcdir,
-        include_patterns=[f"**.{extension}" for extension in app.config.tags_extension],
-        exclude_patterns=app.config.exclude_patterns,
-    )
-
-    for path in doc_paths:
-        entry = Entry(Path(app.srcdir) / path)
+    for docname in app.env.found_docs:
+        doctags = app.env.metadata[docname].get("tags", None)
+        if doctags is None:
+            continue  # skip if no tags
+        entry = Entry(app.env.doc2path(docname), doctags)
         entry.assign_to_tags(tags)
         pages.append(entry)
-
     return tags, pages
 
 
 def update_tags(app):
     """Update tags according to pages found"""
-
     if app.config.tags_create_tags:
         tags_output_dir = Path(app.config.tags_output_dir)
 
@@ -324,6 +305,7 @@ def update_tags(app):
 
         # Create pages for each tag
         tags, pages = assign_entries(app)
+
         for tag in tags.values():
             tag.create_file(
                 [item for item in pages if tag.name in item.tags],
@@ -386,4 +368,5 @@ def setup(app):
         "version": __version__,
         "parallel_read_safe": True,
         "parallel_write_safe": True,
+        "env_version": 1,
     }

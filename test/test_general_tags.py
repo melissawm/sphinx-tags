@@ -19,6 +19,7 @@ def run_all_formats():
             pytest.param(marks=pytest.mark.sphinx("text", testroot="symlink")),
             pytest.param(marks=pytest.mark.sphinx("text", testroot="ipynb")),
         ],
+        ids=["myst", "rst", "symlink", "ipynb"],
     )
 
 
@@ -29,7 +30,7 @@ def test_build(app: SphinxTestApp, status: StringIO, warning: StringIO):
 
     # Build with notebooks and text output results in spurious errors "File Not Found: _tags/*.html"
     # For all other formats, ensure no warnings are raised
-    if not app.srcdir.endswith("ipynb"):
+    if not str(app.srcdir).endswith("ipynb"):
         assert not warning.getvalue().strip()
 
 

@@ -1,4 +1,4 @@
-extensions = ["sphinx_design", "sphinx_tags", "myst_parser"]
+extensions = ["sphinx_tags", "myst_parser", "sphinx_design"]
 tags_create_tags = True
 tags_extension = ["md"]
 tags_create_badges = True

@@ -5,7 +5,7 @@ Tags overview
 Tags
 ^^^^
 
-* [{(tag   4)}] (1)
+* [{(tag 4)}] (1)
 
 * tag 3 (2)
 
