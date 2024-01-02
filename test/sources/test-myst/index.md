@@ -9,3 +9,6 @@ page_5
 subdir/index
 _tags/tagsindex
 ```
+
+## Test ref
+{ref}`sphx_tag_tag_1`

@@ -52,3 +52,9 @@ Test document
   * {{🧪test tag; please ignore🧪}} (1)
 
     * Page 2
+
+
+Test ref
+========
+
+My tags: tag_1
