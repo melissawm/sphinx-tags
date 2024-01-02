@@ -21,7 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 sphinx = [
-    "pydata-sphinx-theme",
+    "pydata-sphinx-theme>=0.13",
     "sphinx-design",
     "nbsphinx",
     "myst-parser"

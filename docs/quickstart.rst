@@ -42,32 +42,34 @@ Next, add the following configuration setting to ``conf.py``::
 
    tags_create_tags = True
 
-To assign one or more tags to a page in the documentation, use
+To assign one or more tags to a page in the documentation, use:
 
-.. code-block:: rst
+.. tab-set::
 
-   .. tags:: tag1, tag2
+    .. tab-item:: rST
+
+      .. code-block:: rst
+
+         .. tags:: tag1, tag2
+
+    .. tab-item:: MyST (Markdown)
+
+      .. code-block:: md
+
+         ```{tags} tag1, tag2
+         ```
 
 Tags must be separated by commas, and the tags will be shown in the rendered
-html output at the same position in the page as in the source .rst file.
+html output at the same position in the page as in the source file.
 
-For each tag, a new rst file is created in ``<output_dir>/<tagname>.rst``
+For each tag, a new source file is created in ``<output_dir>/<tagname>.<ext>``
 containing a table of contents of each file associated with that tag (see
-:ref:`config`). A reference label will be added to this rst file, to enable you to
+:ref:`config`). A reference label will be added to this file, to enable you to
 cross-reference to it. The reference label will have the format: ``sphx_tag_<tagname>``
 e.g., a reference would look like: ``:ref:`sphx_tag_tag1```.
 
 A :ref:`tagoverview` page is also created that can be added to the index and
 show all tags defined for this documentation set.
-
-.. note::
-
-   If you are using MyST to write your documentation in Markdown, you can use
-
-   ::
-
-      ```{tags} tag1, tag2
-      ```
 
 .. note::
 

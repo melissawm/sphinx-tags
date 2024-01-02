@@ -172,10 +172,12 @@ class Tag:
         """
         # Get sorted file paths for tag pages, relative to /docs/_tags
         tag_page_paths = sorted([i.relpath(srcdir) for i in items])
+        ref_label = f"sphx_tag_{self.file_basename}"
 
         content = []
         if "md" in extension:
             filename = f"{self.file_basename}.md"
+            content.append(f"({ref_label})=")
             content.append(f"# {tags_page_title}: {self.name}")
             content.append("")
             content.append("```{toctree}")
@@ -189,11 +191,11 @@ class Tag:
         else:
             filename = f"{self.file_basename}.rst"
             header = f"{tags_page_title}: {self.name}"
+            content.append(f".. _{ref_label}:")
+            content.append("")
             content.append(header)
             content.append("#" * textwidth(header))
             content.append("")
-            #  Return link block at the start of the page"""
-            content.append(f".. _sphx_tag_{self.file_basename}:")
             content.append(".. toctree::")
             content.append("    :maxdepth: 1")
             content.append(f"    :caption: {tags_page_header}")
