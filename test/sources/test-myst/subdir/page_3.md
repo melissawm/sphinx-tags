@@ -1,3 +1,3 @@
 # Page 3
-```{tags} tag 3
+```{tag:tags} tag 3
 ```
