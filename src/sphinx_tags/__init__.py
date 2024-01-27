@@ -9,9 +9,12 @@ from pathlib import Path
 from typing import List
 
 from docutils import nodes
+from docutils.parsers.rst import Parser
+from docutils import frontend, utils
 from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
+from sphinx.util.matching import get_matching_files
 from sphinx.util.rst import textwidth
 
 __version__ = "0.3.1"
@@ -30,11 +33,10 @@ class TagLinks(SphinxDirective):
 
     # Sphinx directive class attributes
     required_arguments = 0
-    optional_arguments = 1  # Arbitrary, split on seperator
+    optional_arguments = 1  # Arbitrary, split on separator
     final_argument_whitespace = True
     has_content = True
     final_argument_whitespace = True
-    # Custom attributes
     separator = ","
 
     def run(self):
@@ -42,13 +44,19 @@ class TagLinks(SphinxDirective):
             raise ExtensionError("No tags passed to 'tags' directive.")
 
         tagline = []
-        # normalize white space and remove "\n"
+
+        # normalize white space and remove "\n" 
         if self.arguments:
             tagline.extend(self.arguments[0].split())
         if self.content:
             tagline.extend((" ".join(self.content)).strip().split())
+        #tags = read_tags(tagline, ".. tags::", "")
+        #tags = [tag.strip() for tag in (" ".join(tagline)).split(self.separator)]
 
-        tags = [tag.strip() for tag in (" ".join(tagline)).split(self.separator)]
+        settings = frontend.get_default_settings(Parser)
+        document = utils.new_document("tags", settings)
+        tags = Parser().parse(tagline, document)
+        print(f"Tags: {tags}")
 
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
@@ -56,9 +64,11 @@ class TagLinks(SphinxDirective):
         result += nodes.inline(text=f"{self.env.app.config.tags_intro_text} ")
         count = 0
 
+        # Parse the directive contents.
+        self.state.nested_parse(self.content, self.content_offset, result)
+
         current_doc_dir = Path(self.env.doc2path(self.env.docname)).parent
         relative_tag_dir = Path(os.path.relpath(tag_dir, current_doc_dir))
-
         for tag in tags:
             count += 1
             # We want the link to be the path to the _tags folder, relative to
@@ -80,9 +90,6 @@ class TagLinks(SphinxDirective):
                 tag_separator = f"{self.separator} "
             if not count == len(tags):
                 result += nodes.inline(text=tag_separator)
-
-        # register tags to global metadata for document
-        self.env.metadata[self.env.docname]["tags"] = tags
 
         return [result]
 
@@ -133,6 +140,9 @@ class Tag:
         self.items = []
         self.name = name
         self.file_basename = _normalize_tag(name)
+
+    def __repr__(self):
+        return f"Tag({self.name}), {len(self.items)} items: {self.items}"
 
     def create_file(
         self,
@@ -214,20 +224,59 @@ class Tag:
 class Entry:
     """Tags to pages map"""
 
-    def __init__(self, entrypath: Path, tags: list):
+    # def __init__(self, entrypath: Path, tags: list):
+    def __init__(self, entrypath: Path):
         self.filepath = entrypath
-        self.tags = tags
+        self.lines = self.filepath.read_text(encoding="utf8").split("\n")
+        if self.filepath.suffix == ".rst":
+            tagstart = ".. tags::"
+            tagend = ""
+        elif self.filepath.suffix == ".md":
+            tagstart = "```{tags}"
+            tagend = "```"
+        elif self.filepath.suffix == ".ipynb":
+            tagstart = '".. tags::'
+            tagend = '"'
+        else:
+            raise ValueError(
+                "Unknown file extension. Currently, only .rst, .md and .ipynb are supported."
+            )
+
+        self.tags = read_tags(self.lines, tagstart, tagend)
+
+
+    def __repr__(self):
+        return f"Entry({self.filepath}), {self.tags}"
+
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
         for tag in self.tags:
-            if tag not in tag_dict:
-                tag_dict[tag] = Tag(tag)
-            tag_dict[tag].items.append(self)
+            if tag:
+                if tag not in tag_dict:
+                    tag_dict[tag] = Tag(tag)
+                tag_dict[tag].items.append(self)
 
     def relpath(self, root_dir) -> str:
         """Get this entry's path relative to the given root directory"""
         return Path(os.path.relpath(self.filepath, root_dir)).as_posix()
+
+def read_tags(lines, tagstart, tagend):
+    """Read tags from a list of lines in a file.
+
+    """
+    tagline = [line for line in lines if tagstart in line]
+    # Custom attributes
+    separator = ","
+
+    tags = []
+    if tagline:
+        # TODO: This is matching the .. tags:: example inside a code-block
+        # in configuration.rst
+        tagline = tagline[0].replace(tagstart, "").rstrip(tagend)
+        tags = [" ".join(tag.strip().split()) for tag in tagline.split(separator)]
+        tags = [tag for tag in tags if tag != ""]
+    return tags
 
 
 def _normalize_tag(tag: str) -> str:
@@ -291,17 +340,32 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
 
 
 def assign_entries(app):
-    """Assign all found entries to their tag."""
+    """Assign all found entries to their tag.
+
+    Returns
+    -------
+    tags : dict
+        Dictionary of tags, keyed by tag name
+    pages : list
+        List of Entry objects
+    """
     pages = []
     tags = {}
 
-    for docname in app.env.found_docs:
-        doctags = app.env.metadata[docname].get("tags", None)
-        if doctags is None:
-            continue  # skip if no tags
-        entry = Entry(app.env.doc2path(docname), doctags)
+    doc_paths = get_matching_files(
+        app.srcdir,
+        include_patterns=[f"**.{extension}" for extension in app.config.tags_extension],
+        exclude_patterns=app.config.exclude_patterns,
+    )
+
+    for path in doc_paths:
+        entry = Entry(Path(app.srcdir) / path)
         entry.assign_to_tags(tags)
         pages.append(entry)
+        # docname is path without the file extension
+        # docname = path.split(".", 1)[0]
+        # register tags to global metadata for document
+        # app.env.metadata[docname]["tags"] = tags
 
     return tags, pages
 
@@ -322,14 +386,15 @@ def update_tags(app):
         tags, pages = assign_entries(app)
 
         for tag in tags.values():
-            tag.create_file(
-                [item for item in pages if tag.name in item.tags],
-                app.config.tags_extension,
-                tags_output_dir,
-                app.srcdir,
-                app.config.tags_page_title,
-                app.config.tags_page_header,
-            )
+            if tag:
+                tag.create_file(
+                    [item for item in pages if tag.name in item.tags],
+                    app.config.tags_extension,
+                    tags_output_dir,
+                    app.srcdir,
+                    app.config.tags_page_title,
+                    app.config.tags_page_header,
+                )
 
         # Create tags overview page
         tagpage(
