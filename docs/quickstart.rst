@@ -3,7 +3,7 @@ Quickstart
 
 The ``sphinx-tags`` package enables the use of blog-style tags with Sphinx.
 
-.. tags:: tag documentation, tag installation
+.. tags:: tag   documentation, tag installation
 
 Tags are created using the custom directive ``.. tags::`` with the tag titles
 as arguments.
