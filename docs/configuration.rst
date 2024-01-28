@@ -117,3 +117,18 @@ Tags can be passed in either as arguments or in the body of the directive:
 
       tag1, tag2, tag3,
       tag4, tag5, tag6,
+
+Usage with sphinx-autobuild
+---------------------------
+
+`Sphinx-autobuild <https://github.com/sphinx-doc/sphinx-autobuild>`_ is a live-reload
+tool for local development that automatically rebuilds your docs when changes are
+detected. Sphinx-tags dynamically generates a tag overview and tag index pages
+during each build, so you will want to tell sphinx-autobuild to ignore these
+files so it doesn't get stuck in a loop. Example:
+
+.. code-block:: sh
+
+    sphinx-autobuild docs docs/_build/html --ignore '**/_tags/*'
+
+If you have set ``tags_output_dir`` to a different path, use that instead of ``_tags``.
