@@ -11,4 +11,5 @@ Test document
 
 Test ref
 --------
-:ref:`sphx_tag_tag_1`
+`tag_1`
+.. :ref:`sphx_tag_tag_1`

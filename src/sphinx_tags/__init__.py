@@ -1,13 +1,25 @@
 """Sphinx extension to create tags for documentation pages.
 
 """
+from collections import defaultdict
+from collections.abc import Iterable
 import os
 import re
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import List
+from typing import List, Any
 
 from docutils import nodes
+from docutils.nodes import Element
+from docutils.parsers.rst import directives
+
+from sphinx import addnodes
+from sphinx.addnodes import desc_signature
+from sphinx.directives import ObjectDescription
+from sphinx.domains import Domain, Index, IndexEntry
+from sphinx.roles import XRefRole
+
+from sphinx.util.nodes import make_refnode
 from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
@@ -17,8 +29,15 @@ __version__ = "0.3.1"
 
 logger = getLogger("sphinx-tags")
 
+"""
+https://www.sphinx-doc.org/en/master/development/tutorials/recipe.html
 
-class TagLinks(SphinxDirective):
+page \\approx recipie
+tag \\approx
+"""
+
+
+class TagLinks(ObjectDescription):
     """Custom directive for adding tags to Sphinx-generated files.
 
     Loosely based on https://stackoverflow.com/questions/18146107/how-to-add-blog-style-tags-in-restructuredtext-with-sphinx
@@ -36,7 +55,21 @@ class TagLinks(SphinxDirective):
     # Custom attributes
     separator = ","
 
-    def run(self):
+    def get_signatures(self) -> list[str]:
+        # signature can be none, instead identify using doc name
+        return []
+
+    def handle_signature(self, sig: str, signode: desc_signature) -> Any:
+        print(f"sig:{sig} {signode}")
+
+        signode += addnodes.desc_name(text=self.env.docname)
+        return sig
+
+    def add_target_and_index(
+        self, name: Any, sig: str, signode: desc_signature
+    ) -> None:
+        signode["ids"].append(f"tagpage-{sig}")
+
         if not (self.arguments or self.content):
             raise ExtensionError("No tags passed to 'tags' directive.")
 
@@ -58,6 +91,7 @@ class TagLinks(SphinxDirective):
         current_doc_dir = Path(self.env.doc2path(self.env.docname)).parent
         relative_tag_dir = Path(os.path.relpath(tag_dir, current_doc_dir))
 
+        # this probably gets moved to tag index
         for tag in tags:
             count += 1
             # We want the link to be the path to the _tags folder, relative to
@@ -83,7 +117,8 @@ class TagLinks(SphinxDirective):
         # register tags to global metadata for document
         self.env.metadata[self.env.docname]["tags"] = tags
 
-        return [result]
+        td = self.env.get_domain("tag")
+        td.add_tagpage(self.env.docname, tags)
 
     def _get_plaintext_node(
         self, tag: str, file_basename: str, relative_tag_dir: Path
@@ -123,6 +158,111 @@ class TagLinks(SphinxDirective):
             if fnmatch(tag, pattern):
                 return color
         return "primary"
+
+
+class TagsIndex(Index):
+    """A custom index that creates a tags matrix."""
+
+    name = "tag"
+    localname = "Tag Index"
+    shortname = "Tag"
+
+    def generate(
+        self, docnames: Iterable[str] | None = None
+    ) -> tuple[list[tuple[str, list[IndexEntry]]], bool]:
+        content = defaultdict(list)
+
+        pages = {
+            name: (dispname, typ, docname, anchor)
+            for name, dispname, typ, docname, anchor, _ in self.domain.get_objects()
+        }
+        pages_tags = self.domain.data["tags"]
+
+        tags_pages = defaultdict(list)
+
+        # create tag->pages mapping
+        for page_name, tags in pages_tags.items():
+            for tag in tags:
+                tags_pages[tag].append(page_name)
+
+        # create specific output
+        for tag, page_names in tags_pages.items():
+            for page_name in page_names:
+                dispname, typ, docname, anchor = pages[page_name]
+                content[tag].append(dispname, 0, docname, anchor, docname, "", typ)
+
+        # convert the dict to the sorted list of tuples expected
+
+        return sorted(content.items()), True
+
+
+class PagesIndex(Index):
+    """A custom index that creates a pages matrix."""
+
+    name = "tagpage"
+    localname = "Page Index"
+    shortname = "TagPage"
+
+    def generate(
+        self, docnames: Iterable[str] | None = None
+    ) -> tuple[list[tuple[str, list[IndexEntry]]], bool]:
+        content = defaultdict(list)
+
+        # sort the list of pages
+        pages = sorted(self.domain.get_objects(), key=lambda page: page[0])
+
+        # name, subtype, docname, anchor, extra, qualifier, description
+
+        for _name, dispname, typ, docname, anchor, _priority in pages:
+            content[dispname[0].lower()].append(
+                (dispname, 0, docname, anchor, docname, "", typ)
+            )
+
+        # convert the dict to the sorted list of tuples expected
+
+        return sorted(content.items()), True
+
+
+class TagDomain(Domain):
+    name = "tag"
+    roles = {"ref": XRefRole()}
+    directives = {"tags": TagLinks}
+    initial_data = {
+        "pages": [],  # pages list
+        "tags": {},  # name -> tags
+    }
+
+    def get_full_qualified_name(self, node: Element) -> str | None:
+        return f"tagpage.{node.arguments[0]}"
+
+    def get_objects(self) -> Iterable[tuple[str, str, str, str, str, int]]:
+        yield from self.data["pages"]
+
+    def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
+        match = [
+            (docname, anchor)
+            for name, sig, typ, docname, anchor, prio in self.get_objects()
+            if sig == target
+        ]
+
+        if len(match) > 0:
+            todocname = match[0][0]
+            targ = match[0][1]
+            return make_refnode(builder, fromdocname, todocname, targ, contnode, targ)
+        else:
+            logger.info(f"Found nothing: {fromdocname}->{target}")
+            return None
+
+    def add_tagpage(self, docname, tags):
+        """Add a new page of tags to domain"""
+        name = f"tagpage.{docname}"
+        anchor = f"tagpage-{docname}"
+
+        self.data["tags"][name] = tags
+        # name, dispname, type, docname, anchor, priority
+        self.data["pages"].append(
+            (name, docname, "TagPage", self.env.docname, anchor, 0)
+        )
 
 
 class Tag:
@@ -375,8 +515,9 @@ def setup(app):
     # TODO: tags should be updated after sphinx-gallery is generated, and the
     # gallery is also connected to builder-inited. Are there situations when
     # this will not work?
-    app.connect("builder-inited", update_tags)
-    app.add_directive("tags", TagLinks)
+    app.add_domain(TagDomain)
+    # app.connect("builder-inited", update_tags)
+    # app.add_directive("tags", TagLinks)
 
     return {
         "version": __version__,
