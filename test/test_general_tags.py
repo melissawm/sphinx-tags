@@ -1,4 +1,5 @@
 """General tests for tag index and tag pages"""
+
 from io import StringIO
 from pathlib import Path
 from unittest.mock import MagicMock
