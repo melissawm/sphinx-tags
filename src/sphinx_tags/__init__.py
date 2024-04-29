@@ -1,6 +1,7 @@
 """Sphinx extension to create tags for documentation pages.
 
 """
+
 import os
 import re
 from fnmatch import fnmatch

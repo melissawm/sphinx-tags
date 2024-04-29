@@ -8,6 +8,7 @@
     * This subdirectory must contain a conf.py and source files
 * The `outputs` dir contains expected output files
 """
+
 import shutil
 from os import symlink
 from pathlib import Path
