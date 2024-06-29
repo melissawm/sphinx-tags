@@ -120,3 +120,5 @@ files so it doesn't get stuck in a loop. Example:
     sphinx-autobuild docs docs/_build/html --ignore '**/_tags/*'
 
 If you have set ``tags_output_dir`` to a different path, use that instead of ``_tags``.
+
+.. tags:: tag documentation
