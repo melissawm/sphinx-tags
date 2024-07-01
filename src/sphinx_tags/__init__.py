@@ -2,7 +2,7 @@
 
 """
 
-from sphinx.domains import Domain
+from sphinx.domains import Domain, Index, IndexEntry
 from sphinx.util.logging import getLogger
 from sphinx.util.docutils import SphinxDirective
 from sphinx.errors import ExtensionError
@@ -14,6 +14,8 @@ import os
 from typing import List
 from fnmatch import fnmatch
 import re
+from collections.abc import Iterable
+from collections import defaultdict
 
 __version__ = "0.4dev"
 
@@ -66,7 +68,8 @@ class TagLinks(SphinxDirective):
             page_tags.extend(
                 [_normalize_tag(tag) for tag in ",".join(self.content).split(",")]
             )
-        # Remove empty elements from page_tags (can happen after _normalize_tag())
+        # Remove empty elements from page_tags
+        # (can happen after _normalize_tag())
         page_tags = list(filter(None, page_tags))
 
         global_tags = self.env.get_domain("tags")
@@ -103,6 +106,9 @@ class TagLinks(SphinxDirective):
                 tag_separator = f"{self.separator} "
             if not count == len(page_tags):
                 result += nodes.inline(text=tag_separator)
+
+        td = self.env.get_domain("tags")
+        td.add_tagpage(self.env.docname, page_tags)
 
         return [result]
 
@@ -146,6 +152,33 @@ class TagLinks(SphinxDirective):
         return "primary"
 
 
+class PagesIndex(Index):
+    """A custom index that creates a pages matrix."""
+
+    name = "tagpage"
+    localname = "Page Index"
+    shortname = "TagPage"
+
+    def generate(
+        self, docnames: Iterable[str] | None = None
+    ) -> tuple[list[tuple[str, list[IndexEntry]]], bool]:
+        content = defaultdict(list)
+
+        # sort the list of pages
+        pages = sorted(self.domain.get_objects(), key=lambda page: page[0])
+
+        # name, subtype, docname, anchor, extra, qualifier, description
+
+        for _name, dispname, typ, docname, anchor, _priority in pages:
+            content[dispname[0].lower()].append(
+                (dispname, 0, docname, anchor, docname, "", typ)
+            )
+
+        # convert the dict to the sorted list of tuples expected
+
+        return sorted(content.items()), True
+
+
 class TagsDomain(Domain):
 
     name = "tags"
@@ -157,12 +190,15 @@ class TagsDomain(Domain):
         "tags": TagLinks,
     }
 
+    indices = [PagesIndex]
+
     # The values defined in initial_data will be copied to
     # env.domaindata[domain_name] as the initial data of the domain, and domain
     # instances can access it via self.data.
     initial_data = {
-        "tags": [],
-        "entries": {},
+        "tags": [],  # list of tags
+        "entries": {},  # list of pages with tags
+        "pages": [],  # list of tag pages
     }
 
     def get_full_qualified_name(self, node):
@@ -185,6 +221,17 @@ class TagsDomain(Domain):
         # Add this tag to the global list of tags
         # name, dispname, type, docname, anchor, priority
         self.data["tags"].append((tagname, tagname, "Tag", page, anchor, 0))
+
+    def add_tagpage(self, docname, tags):
+        """Add a new page of tags to domain"""
+        name = f"tagpage.{docname}"
+        anchor = f"tagpage-{docname}"
+
+        print(f"{self.data['tags']=}")
+        # name, dispname, type, docname, anchor, priority
+        self.data["pages"].append(
+            (name, docname, "TagPage", self.env.docname, anchor, 0)
+        )
 
 
 def create_file(
@@ -346,7 +393,7 @@ def update_tags(app):
                 os.remove(os.path.join(app.srcdir, tags_output_dir, file))
 
         # Create pages for each tag
-        global_tags = env.get_domain("tags").data["entries"]
+        global_tags = app.env.get_domain("tags").data["entries"]
         logger.info(f"Global tags: {global_tags=}", color="green")
 
         for tag in global_tags.items():
@@ -408,7 +455,7 @@ def setup(app):
     # Update tags
     # Tags should be updated after sphinx-gallery is generated, on
     # builder-inited
-    app.connect("source-read", update_tags)
+    app.connect("builder-inited", update_tags)
     app.add_directive("tags", TagLinks)
     app.add_domain(TagsDomain)
 
