@@ -5,3 +5,4 @@ Usage examples
 
     examples
     raw-cells
+    multiline
