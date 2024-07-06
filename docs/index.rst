@@ -27,3 +27,7 @@ Check out the `list of projects that use this extension <https://github.com/meli
    :titlesonly:
 
    _tags/tagsindex.md
+
+Indices and tables
+==================
+* :ref:`tags-index`
