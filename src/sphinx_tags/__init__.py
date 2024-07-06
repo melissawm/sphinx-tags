@@ -13,8 +13,9 @@ from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
 from sphinx.util.rst import textwidth
+from sphinx.util.matching import get_matching_files
 
-__version__ = "0.3.1"
+__version__ = "0.4dev"
 
 logger = getLogger("sphinx-tags")
 
@@ -26,11 +27,25 @@ class TagLinks(SphinxDirective):
 
     See also https://docutils.sourceforge.io/docs/howto/rst-directives.html
 
+    This directive can be used with arguments and with content.
+
+    1. With arguments:
+
+        .. raw:: rst
+            .. tags:: tag1, tag2, tag3
+
+    2. With (multiline) content:
+
+        .. raw:: rst
+            .. tags::
+
+                tag1, tag2,
+                tag3
     """
 
     # Sphinx directive class attributes
     required_arguments = 0
-    optional_arguments = 1  # Arbitrary, split on seperator
+    optional_arguments = 1  # Arbitrary, split on separator
     final_argument_whitespace = True
     has_content = True
     final_argument_whitespace = True
@@ -41,14 +56,21 @@ class TagLinks(SphinxDirective):
         if not (self.arguments or self.content):
             raise ExtensionError("No tags passed to 'tags' directive.")
 
-        tagline = []
+        page_tags = []
         # normalize white space and remove "\n"
         if self.arguments:
-            tagline.extend(self.arguments[0].split())
+            page_tags.extend(
+                [_normalize_tag(tag) for tag in self.arguments[0].split(",")]
+            )
         if self.content:
-            tagline.extend((" ".join(self.content)).strip().split())
-
-        tags = [tag.strip() for tag in (" ".join(tagline)).split(self.separator)]
+            # self.content: StringList(['different, tags,', 'separated'],
+            #                          items=[(path, lineno), (path, lineno)])
+            page_tags.extend(
+                [_normalize_tag(tag) for tag in ",".join(self.content).split(",")]
+            )
+        # Remove empty elements from page_tags
+        # (can happen after _normalize_tag())
+        page_tags = list(filter(None, page_tags))
 
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
@@ -59,7 +81,7 @@ class TagLinks(SphinxDirective):
         current_doc_dir = Path(self.env.doc2path(self.env.docname)).parent
         relative_tag_dir = Path(os.path.relpath(tag_dir, current_doc_dir))
 
-        for tag in tags:
+        for tag in page_tags:
             count += 1
             # We want the link to be the path to the _tags folder, relative to
             # this document's path where
@@ -70,7 +92,7 @@ class TagLinks(SphinxDirective):
             #   |
             #    - current_doc_path
 
-            file_basename = _normalize_tag(tag)
+            file_basename = _normalize_tag(tag, dashes=True)
 
             if self.env.app.config.tags_create_badges:
                 result += self._get_badge_node(tag, file_basename, relative_tag_dir)
@@ -78,11 +100,11 @@ class TagLinks(SphinxDirective):
             else:
                 result += self._get_plaintext_node(tag, file_basename, relative_tag_dir)
                 tag_separator = f"{self.separator} "
-            if not count == len(tags):
+            if not count == len(page_tags):
                 result += nodes.inline(text=tag_separator)
 
         # register tags to global metadata for document
-        self.env.metadata[self.env.docname]["tags"] = tags
+        self.env.metadata[self.env.docname]["tags"] = page_tags
 
         return [result]
 
@@ -132,7 +154,7 @@ class Tag:
     def __init__(self, name):
         self.items = []
         self.name = name
-        self.file_basename = _normalize_tag(name)
+        self.file_basename = _normalize_tag(name, dashes=True)
 
     def create_file(
         self,
@@ -214,9 +236,45 @@ class Tag:
 class Entry:
     """Tags to pages map"""
 
-    def __init__(self, entrypath: Path, tags: list):
+    def __init__(self, entrypath: Path):
         self.filepath = entrypath
-        self.tags = tags
+        # self.tags = tags
+        # Read tags (for the first time) to create the tag pages
+        self.lines = self.filepath.read_text(encoding="utf8").split("\n")
+        if self.filepath.suffix == ".rst":
+            tagstart = ".. tags::"
+            tagend = ""  # empty line
+        elif self.filepath.suffix == ".md":
+            tagstart = "```{tags}"
+            tagend = "```"
+        elif self.filepath.suffix == ".ipynb":
+            tagstart = '".. tags::'
+            tagend = "]"
+        else:
+            raise ValueError(
+                "Unknown file extension. Currently, only .rst, .md .ipynb are supported."
+            )
+
+        # tagline = [line for line in self.lines if tagstart in line]
+        # tagblock is all content until the next new empty line
+        tagblock = []
+        reading = False
+        for line in self.lines:
+            if tagstart in line:
+                reading = True
+                line = line.split(tagstart)[1]
+                tagblock.extend(line.split(","))
+            else:
+                if reading and line.strip() == tagend:
+                    # tagblock now contains at least one tag
+                    if tagblock != [""]:
+                        break
+                if reading:
+                    tagblock.extend(line.split(","))
+
+        self.tags = []
+        if tagblock:
+            self.tags = [tag.strip().rstrip('"') for tag in tagblock if tag != ""]
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
@@ -230,13 +288,16 @@ class Entry:
         return Path(os.path.relpath(self.filepath, root_dir)).as_posix()
 
 
-def _normalize_tag(tag: str) -> str:
+def _normalize_tag(tag: str, dashes: bool = False) -> str:
     """Normalize a tag name to use in output filenames and tag URLs.
     Replace whitespace and other non-alphanumeric characters with dashes.
 
     Example: 'Tag:with (special   characters) ' -> 'tag-with-special-characters'
     """
-    return re.sub(r"[\s\W]+", "-", tag).lower().strip("-")
+    char = " "
+    if dashes:
+        char = "-"
+    return re.sub(r"[\s\W]+", char, tag).lower().strip(char)
 
 
 def tagpage(tags, outdir, title, extension, tags_index_head):
@@ -295,11 +356,15 @@ def assign_entries(app):
     pages = []
     tags = {}
 
-    for docname in app.env.found_docs:
-        doctags = app.env.metadata[docname].get("tags", None)
-        if doctags is None:
-            continue  # skip if no tags
-        entry = Entry(app.env.doc2path(docname), doctags)
+    # Get document paths in the project that match specified file extensions
+    doc_paths = get_matching_files(
+        app.srcdir,
+        include_patterns=[f"**.{extension}" for extension in app.config.tags_extension],
+        exclude_patterns=app.config.exclude_patterns,
+    )
+
+    for path in doc_paths:
+        entry = Entry(Path(app.srcdir) / path)
         entry.assign_to_tags(tags)
         pages.append(entry)
 

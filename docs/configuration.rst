@@ -106,18 +106,6 @@ Special characters
 Tags can contain spaces and special characters such as emoji. In that case, the
 tag will be normalized when processed. See our :doc:`examples/examples` for more details.
 
-Multiple lines of tags
-----------------------
-
-Tags can be passed in either as arguments or in the body of the directive:
-
-.. code-block:: rst
-
-   .. tags::
-
-      tag1, tag2, tag3,
-      tag4, tag5, tag6,
-
 Usage with sphinx-autobuild
 ---------------------------
 
