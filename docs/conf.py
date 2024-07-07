@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 from sphinx_tags import __version__
 
 sys.path.insert(0, os.path.abspath("../src"))
@@ -35,7 +36,7 @@ release = __version__
 extensions = ["sphinx_design", "sphinx_tags", "nbsphinx", "myst_parser"]
 
 tags_create_tags = True
-tags_create_badges = False
+tags_create_badges = True
 # tags_output_dir = "_tags"  # default
 tags_overview_title = "All tags"  # default: "Tags overview"
 tags_extension = ["rst", "md", "ipynb"]  # default: ["rst"]
