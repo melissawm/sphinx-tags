@@ -263,12 +263,13 @@ class Entry:
         tagblock = []
         reading = False
         for line in self.lines:
+            line = line.strip()
             if tagstart in line:
                 reading = True
                 line = line.split(tagstart)[1]
                 tagblock.extend(line.split(","))
             else:
-                if reading and line.strip() == tagend:
+                if reading and line == tagend:
                     # tagblock now contains at least one tag
                     if tagblock != [""]:
                         break
@@ -277,7 +278,7 @@ class Entry:
 
         self.tags = []
         if tagblock:
-            self.tags = [_normalize_display_tag(tag).rstrip('"') for tag in tagblock if tag != ""]
+            self.tags = [_normalize_display_tag(tag) for tag in tagblock if tag != ""]
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
