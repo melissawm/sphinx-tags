@@ -278,7 +278,7 @@ class Entry:
 
         self.tags = []
         if tagblock:
-            self.tags = [_normalize_display_tag(tag) for tag in tagblock if tag != ""]
+            self.tags = [_normalize_display_tag(tag) for tag in tagblock if tag]
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
@@ -309,7 +309,8 @@ def _normalize_display_tag(tag: str) -> str:
 
     Example: '  Tag:with (extra   whitespace) ' -> 'Tag:with (extra whitespace)'
     """
-    return re.sub(r"\s+", " ", tag.strip('"').strip())
+    tag = tag.replace("\\n", "\n").strip('"').strip()
+    return re.sub(r"\s+", " ", tag)
 
 
 def tagpage(tags, outdir, title, extension, tags_index_head):
