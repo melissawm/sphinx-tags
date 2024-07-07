@@ -12,8 +12,8 @@ from docutils import nodes
 from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.logging import getLogger
-from sphinx.util.rst import textwidth
 from sphinx.util.matching import get_matching_files
+from sphinx.util.rst import textwidth
 
 __version__ = "0.4dev"
 
@@ -60,13 +60,16 @@ class TagLinks(SphinxDirective):
         # normalize white space and remove "\n"
         if self.arguments:
             page_tags.extend(
-                [_normalize_tag(tag) for tag in self.arguments[0].split(",")]
+                [_normalize_display_tag(tag) for tag in self.arguments[0].split(",")]
             )
         if self.content:
             # self.content: StringList(['different, tags,', 'separated'],
             #                          items=[(path, lineno), (path, lineno)])
             page_tags.extend(
-                [_normalize_tag(tag) for tag in ",".join(self.content).split(",")]
+                [
+                    _normalize_display_tag(tag)
+                    for tag in ",".join(self.content).split(",")
+                ]
             )
         # Remove empty elements from page_tags
         # (can happen after _normalize_tag())
@@ -153,7 +156,7 @@ class Tag:
 
     def __init__(self, name):
         self.items = []
-        self.name = name
+        self.name = _normalize_display_tag(name)
         self.file_basename = _normalize_tag(name, dashes=True)
 
     def create_file(
@@ -274,7 +277,7 @@ class Entry:
 
         self.tags = []
         if tagblock:
-            self.tags = [tag.strip().rstrip('"') for tag in tagblock if tag != ""]
+            self.tags = [_normalize_display_tag(tag).rstrip('"') for tag in tagblock if tag != ""]
 
     def assign_to_tags(self, tag_dict):
         """Append ourself to tags"""
@@ -298,6 +301,14 @@ def _normalize_tag(tag: str, dashes: bool = False) -> str:
     if dashes:
         char = "-"
     return re.sub(r"[\s\W]+", char, tag).lower().strip(char)
+
+
+def _normalize_display_tag(tag: str) -> str:
+    """Strip extra whitespace from a tag name for display purposes.
+
+    Example: '  Tag:with (extra   whitespace) ' -> 'Tag:with (extra whitespace)'
+    """
+    return re.sub(r"\s+", " ", tag.strip('"').strip())
 
 
 def tagpage(tags, outdir, title, extension, tags_index_head):
