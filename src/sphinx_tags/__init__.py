@@ -15,7 +15,7 @@ from sphinx.util.logging import getLogger
 from sphinx.util.matching import get_matching_files
 from sphinx.util.rst import textwidth
 
-__version__ = "0.4dev"
+__version__ = "0.4"
 
 logger = getLogger("sphinx-tags")
 
