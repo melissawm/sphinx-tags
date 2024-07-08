@@ -31,6 +31,10 @@
 
 - Fixed doc links and minimum sphinx version
 
+## Version 0.4.0 (July 8, 2024)
+
+- Added basic support for multiline tags
+
 ## Unreleased
 
 - Added support for tags in directive body
