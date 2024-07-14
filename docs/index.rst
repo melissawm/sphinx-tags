@@ -26,4 +26,8 @@ Check out the `list of projects that use this extension <https://github.com/meli
    :maxdepth: 2
    :titlesonly:
 
-   _tags/tagsindex
+   _tags/tagsindex.md
+
+Indices and tables
+==================
+* :ref:`tags-index`
