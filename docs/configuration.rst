@@ -29,6 +29,15 @@ A few custom configuration keys can be used in your ``conf.py`` file.
   - Whether to display tags using sphinx-design badges. **Default:** ``False``
 - ``tags_badge_colors``
   - Colors to use for badges based on tag name. **Default:** ``{}``
+- ``tags_allowed_tag_names_regex``
+  - Define one or multiple regular expressions that each tag name must pass.
+    All names are allowed by default. **Default:** ``[]``
+- ``tags_minimum_tag_count``
+  - Define a required minimum amount of tags per directive.
+    No minimum is set by default. **Default:** ``-1``
+- ``tags_maximum_tag_count``
+  - Define a required maximum amount of tags per directive.
+    No minimum is set by default. **Default:** ``-1``
 
 
 Tags overview page
