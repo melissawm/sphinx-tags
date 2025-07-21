@@ -7,6 +7,7 @@ import re
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
+import warnings
 
 from docutils import nodes
 from sphinx.errors import ExtensionError
@@ -399,7 +400,19 @@ def update_tags(app):
         # Create pages for each tag
         tags, pages = assign_entries(app)
 
+        # validate tag
+        if valid_tags := app.config.tags_valid_names:
+            normalized_valid_tags = [_normalize_tag(v) for v in valid_tags]
+        else:
+            normalized_valid_tags = None
+
         for tag in tags.values():
+            if (
+                normalized_valid_tags
+                and _normalize_tag(tag.name) not in normalized_valid_tags
+            ):
+                logger.warning(f"{tag.name} not in 'tag_valid_names' list in conf.py")
+
             tag.create_file(
                 [item for item in pages if tag.name in item.tags],
                 app.config.tags_extension,
@@ -440,6 +453,7 @@ def setup(app):
     app.add_config_value("tags_index_head", "Tags", "html")
     app.add_config_value("tags_create_badges", False, "html")
     app.add_config_value("tags_badge_colors", {}, "html")
+    app.add_config_value("tags_valid_names", None, "html")
 
     # internal config values
     app.add_config_value(

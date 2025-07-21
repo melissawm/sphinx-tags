@@ -1,6 +1,7 @@
 """General tests for tag index and tag pages"""
 
 from io import StringIO
+import logging
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -106,3 +107,20 @@ def test_empty_taglinks():
     msg = "No tags passed to 'tags' directive"
     with pytest.raises(ExtensionError, match=msg):
         tag_links.run()
+
+
+@pytest.mark.sphinx(
+    confoverrides={
+        "tags_valid_names": [
+            "tag_1",
+            "tag2",
+            "tag-4",
+            "tag_5",
+            "test-tag-please-ignore",
+        ]
+    }
+)
+@run_all_formats()
+def test_validate_tags(caplog, app: SphinxTestApp):
+    app.build(force_all=True)
+    print("WARNINGS", caplog)
