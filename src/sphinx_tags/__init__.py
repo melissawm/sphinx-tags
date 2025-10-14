@@ -192,6 +192,10 @@ class Tag:
         tag_intro_text: str
             the words after which the tags of a given page are listed (e.g. "Tags: programming, python")
 
+        Returns
+        -------
+        filename : str
+            The path of the generated file.
 
         """
         # Get sorted file paths for tag pages, relative to /docs/_tags
@@ -228,10 +232,10 @@ class Tag:
                 content.append(f"    ../{path}")
 
         content.append("")
-        with open(
-            os.path.join(srcdir, tags_output_dir, filename), "w", encoding="utf8"
-        ) as f:
+        output_filepath = os.path.join(srcdir, tags_output_dir, filename)
+        with open(output_filepath, "w", encoding="utf8") as f:
             f.write("\n".join(content))
+        return output_filepath
 
 
 class Entry:
@@ -316,6 +320,12 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
 
     This page contains a list of all available tags.
 
+    Returns
+    -------
+
+    filename : str
+        Filename of generated file.
+
     """
 
     tags = list(tags.values())
@@ -365,6 +375,8 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
 
+    return filename
+
 
 def assign_entries(app):
     """Assign all found entries to their tag."""
@@ -388,6 +400,7 @@ def assign_entries(app):
 
 def update_tags(app):
     """Update tags according to pages found"""
+    generated_files = []
     if app.config.tags_create_tags:
         tags_output_dir = Path(app.config.tags_output_dir)
 
@@ -402,7 +415,7 @@ def update_tags(app):
         tags, pages = assign_entries(app)
 
         for tag in tags.values():
-            tag.create_file(
+            filepath = tag.create_file(
                 [item for item in pages if tag.name in item.tags],
                 app.config.tags_extension,
                 tags_output_dir,
@@ -410,20 +423,33 @@ def update_tags(app):
                 app.config.tags_page_title,
                 app.config.tags_page_header,
             )
+            generated_files.append(filepath)
 
         # Create tags overview page
-        tagpage(
+        filepath = tagpage(
             tags,
             os.path.join(app.srcdir, tags_output_dir),
             app.config.tags_overview_title,
             app.config.tags_extension,
             app.config.tags_index_head,
         )
+        generated_files.append(filepath)
         logger.info("Tags updated", color="white")
     else:
         logger.info(
             "Tags were not created (tags_create_tags=False in conf.py)", color="white"
         )
+    return [os.path.relpath(gf.split(".")[0], app.srcdir) for gf in generated_files]
+
+
+def refresh_tags_on_incremental_build(app, env, added, changed, removed):
+    generated_files = set(update_tags(app))
+    if new_files := generated_files.difference(env.found_docs):
+        logger.warning(
+            "The following new tag files were generated on an incremental build, they will not be built by sphinx %s",
+            new_files,
+        )
+    return generated_files
 
 
 def setup(app):
@@ -456,6 +482,7 @@ def setup(app):
     # tags should be updated after sphinx-gallery is generated, and the
     # sphinx-gallery plugin uses default priority so we use a higher one
     app.connect("builder-inited", update_tags, priority=1000)
+    app.connect("env-get-outdated", refresh_tags_on_incremental_build)
     app.add_directive("tags", TagLinks)
 
     return {
