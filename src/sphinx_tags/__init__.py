@@ -453,10 +453,9 @@ def setup(app):
     )
 
     # Update tags
-    # TODO: tags should be updated after sphinx-gallery is generated, and the
-    # gallery is also connected to builder-inited. Are there situations when
-    # this will not work?
-    app.connect("builder-inited", update_tags)
+    # tags should be updated after sphinx-gallery is generated, and the
+    # sphinx-gallery plugin uses default priority so we use a higher one
+    app.connect("builder-inited", update_tags, priority=1000)
     app.add_directive("tags", TagLinks)
 
     return {
