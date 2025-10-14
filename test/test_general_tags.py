@@ -106,3 +106,43 @@ def test_empty_taglinks():
     msg = "No tags passed to 'tags' directive"
     with pytest.raises(ExtensionError, match=msg):
         tag_links.run()
+
+
+@pytest.mark.sphinx("text", testroot="rst", confoverrides={"tags_create_tags": True})
+def test_tag_page_cache(app: SphinxTestApp):
+    """
+    This test attempts to check that when doing an incremental rebuild
+    of sphinx the built tags are updated.
+
+    We do a build, then modify the tag list in one of the tag files
+    and it should change the output on the second build.
+    """
+    app.build(force_all=True)
+    build_dir = Path(app.srcdir) / "_build" / "text"
+
+    # Check all expected tag pages
+    for tag in ["tag_1", "tag2", "tag-3", "tag-4", "tag_5", "test-tag-please-ignore"]:
+        contents = build_dir / "_tags" / f"{tag}.txt"
+        expected_contents = OUTPUT_DIR / "_tags" / f"{tag}.txt"
+        with open(contents, "r") as actual, open(expected_contents, "r") as expected:
+            assert actual.readlines() == expected.readlines()
+
+    # Modify a source file
+    with open(Path(app.srcdir) / "page_1.rst") as fobj:
+        contents = fobj.readlines()
+        contents[-1] = ".. tags:: tag_1, tag2"
+
+    with open(Path(app.srcdir) / "page_1.rst", mode="w+") as fobj:
+        fobj.writelines(contents)
+
+    app.build(force_all=True)
+    build_dir = Path(app.srcdir) / "_build" / "text"
+
+    # Check all expected tag pages
+    for tag in ["tag-3", "tag-4"]:
+        contents = build_dir / "_tags" / f"{tag}.txt"
+        expected_contents = OUTPUT_DIR / "_tags" / f"{tag}.txt"
+        with open(contents, "r") as actual, open(expected_contents, "r") as expected:
+            actual_lines = actual.readlines()
+            assert "* Page 1\n" not in actual_lines
+            assert actual_lines != expected.readlines()
