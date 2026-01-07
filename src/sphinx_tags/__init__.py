@@ -167,7 +167,7 @@ class Tag:
         tags_page_title: str,
         tags_page_header: str,
         tags_overview_title: str,
-        tags: "dict[str, Tag]"
+        tags: "dict[str, Tag]",
     ):
         """Create file with list of documents associated with a given tag in
         toctree format.
@@ -325,11 +325,7 @@ def _normalize_display_tag(tag: str) -> str:
 
 
 def tagpage(
-    tags: dict[str, Tag],
-    outdir: str,
-    title: str,
-    extension: str,
-    tags_index_head: str
+    tags: dict[str, Tag], outdir: str, title: str, extension: str, tags_index_head: str
 ):
     """Creates Tag overview page.
 
@@ -337,7 +333,9 @@ def tagpage(
 
     """
 
-    tags_values = [(len(tag.items), tag.name, tag.file_basename) for tag in tags.values()]
+    tags_values = [
+        (len(tag.items), tag.name, tag.file_basename) for tag in tags.values()
+    ]
     tags_values.sort(key=lambda tag: tag[1].casefold())
     tags_values.sort(key=lambda tag: tag[0], reverse=True)
 
@@ -380,9 +378,7 @@ def tagpage(
         content.append("    :maxdepth: 1")
         content.append("")
         for tag in tags_values:
-            content.append(
-                f"    {tag[1]} ({tag[0]}) <{tag[2]}.rst>"
-            )
+            content.append(f"    {tag[1]} ({tag[0]}) <{tag[2]}.rst>")
         content.append("")
         filename = os.path.join(outdir, "tagsindex.rst")
 
@@ -435,7 +431,7 @@ def update_tags(app: Sphinx):
                 app.config.tags_page_title,
                 app.config.tags_page_header,
                 app.config.tags_overview_title,
-                tags
+                tags,
             )
 
         tagpage(
