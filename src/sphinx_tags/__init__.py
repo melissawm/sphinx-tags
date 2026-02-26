@@ -204,13 +204,12 @@ class Tag:
             content.append(f"({ref_label})=")
             content.append(f"# {tags_page_title}: {self.name}")
             content.append("")
-            content.append("```{toctree}")
-            content.append("---")
-            content.append("maxdepth: 1")
-            content.append(f"caption: {tags_page_header}")
-            content.append("---")
+            content.append(f"{tags_page_header}")
+            content.append("")
             for path in tag_page_paths:
-                content.append(f"../{path}")
+                content.append(
+                    f"- {{doc}}`/{path.as_posix().removesuffix(path.suffix)}`"
+                )
             content.append("```")
         else:
             filename = f"{self.file_basename}.rst"
@@ -220,8 +219,10 @@ class Tag:
             content.append(header)
             content.append("#" * textwidth(header))
             content.append("")
+            content.append(f"{tags_page_header}")
+            content.append("")
             for path in tag_page_paths:
-                content.append(f"- :doc:`/{path.removesuffix('.rst')}`")
+                content.append(f"- :doc:`/{path.as_posix().removesuffix(path.suffix)}`")
 
         content.append("")
         with open(
@@ -281,9 +282,9 @@ class Entry:
                 tag_dict[tag] = Tag(tag)
             tag_dict[tag].items.append(self)
 
-    def relpath(self, root_dir) -> str:
+    def relpath(self, root_dir) -> Path:
         """Get this entry's path relative to the given root directory"""
-        return Path(os.path.relpath(self.filepath, root_dir)).as_posix()
+        return Path(os.path.relpath(self.filepath, root_dir))
 
 
 def _normalize_tag(tag: str, dashes: bool = False) -> str:
