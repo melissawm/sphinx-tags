@@ -166,8 +166,7 @@ class Tag:
         tags_page_title,
         tags_page_header,
     ):
-        """Create file with list of documents associated with a given tag in
-        toctree format.
+        """Create file with list of documents associated with a given tag using the :doc: reference.
 
         This file is reached as a link from the tag name in each documentation
         file, or from the tag overview page.
@@ -210,7 +209,6 @@ class Tag:
                 content.append(
                     f"- {{doc}}`/{path.as_posix().removesuffix(path.suffix)}`"
                 )
-            content.append("```")
         else:
             filename = f"{self.file_basename}.rst"
             header = f"{tags_page_title}: {self.name}"
