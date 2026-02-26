@@ -1,9 +1,7 @@
 My tags: tag2
 *************
 
-
 With this tag
-^^^^^^^^^^^^^
 
 * Page 1
 
