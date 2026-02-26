@@ -220,12 +220,8 @@ class Tag:
             content.append(header)
             content.append("#" * textwidth(header))
             content.append("")
-            content.append(".. toctree::")
-            content.append("    :maxdepth: 1")
-            content.append(f"    :caption: {tags_page_header}")
-            content.append("")
             for path in tag_page_paths:
-                content.append(f"    ../{path}")
+                content.append(f"- :doc:`/{path.removesuffix('.rst')}`")
 
         content.append("")
         with open(
