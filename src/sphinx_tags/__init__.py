@@ -1,6 +1,4 @@
-"""Sphinx extension to create tags for documentation pages.
-
-"""
+"""Sphinx extension to create tags for documentation pages."""
 
 import os
 import re
