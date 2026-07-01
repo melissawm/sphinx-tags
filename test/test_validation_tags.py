@@ -42,6 +42,7 @@ def test_minimum_pass(app: SphinxTestApp, status: StringIO):
 @pytest.mark.sphinx(
     "html",
     testroot="validations",
+    freshenv=True,
     confoverrides={"tags_allowed_tag_names_regex": ["nottag.*"]},
 )
 def test_allowed_tag_names_regex_error(app: SphinxTestApp):
@@ -50,7 +51,10 @@ def test_allowed_tag_names_regex_error(app: SphinxTestApp):
 
 
 @pytest.mark.sphinx(
-    "html", testroot="validations", confoverrides={"tags_minimum_tag_count": 4}
+    "html",
+    testroot="validations",
+    freshenv=True,
+    confoverrides={"tags_minimum_tag_count": 4},
 )
 def test_minimum_error(app: SphinxTestApp):
     with pytest.raises(ExtensionError):
@@ -58,7 +62,10 @@ def test_minimum_error(app: SphinxTestApp):
 
 
 @pytest.mark.sphinx(
-    "html", testroot="validations", confoverrides={"tags_maximum_tag_count": 1}
+    "html",
+    testroot="validations",
+    freshenv=True,
+    confoverrides={"tags_maximum_tag_count": 1},
 )
 def test_maximum_error(app: SphinxTestApp):
     with pytest.raises(ExtensionError):
