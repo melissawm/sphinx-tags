@@ -6,37 +6,60 @@ Configuration
 A few custom configuration keys can be used in your ``conf.py`` file.
 
 - ``tags_create_tags``
-  - Whether to process tags or not. **Default:** ``False``
+
+  * Whether to process tags or not. **Default:** ``False``
+
 - ``tags_output_dir``
-  - Output directory for the tags source files, relative to the project root.
-  **Default:** ``_tags``
+
+  * Output directory for the tags source files, relative to the project root.
+    **Default:** ``_tags``
+
 - ``tags_extension``
-  - A list of file extensions to inspect. Use ``"rst"`` if you are using pure
-  Sphinx, and ``"md"`` if your are using MyST. Note that if you list both
-  ``["md", "rst"]``, all generated pages to be created as Markdown files.
-  **Default:** ``["rst"]``
+
+  * A list of file extensions to inspect. Use ``"rst"`` if you are using pure
+    Sphinx, and ``"md"`` if your are using MyST. Note that if you list both
+    ``["md", "rst"]``, all generated pages to be created as Markdown files.
+    **Default:** ``["rst"]``
+
 - ``tags_intro_text``
-  - The string used on pages that have tags. **Default:** ``Tags``
+
+  * The string used on pages that have tags. **Default:** ``Tags``
+
 - ``tags_page_title``
-  - The title of the tag page, after which the tag is listed. **Default:**
-  ``My tags``
+
+  * The title of the tag page, after which the tag is listed. **Default:**
+    ``My tags``
+
 - ``tags_page_header``
-  - The string after which the pages with the tag are listed. **Default:**
-  ``With this tag``
+
+  * The string after which the pages with the tag are listed. **Default:**
+    ``With this tag``
+
 - ``tags_index_head``
-  - The string used as caption in the tagsindex file. **Default:** ``Tags``
+
+  * The string used as caption in the tagsindex file. **Default:** ``Tags``
+
 - ``tags_create_badges``
-  - Whether to display tags using sphinx-design badges. **Default:** ``False``
+
+  * Whether to display tags using sphinx-design badges. **Default:** ``False``
+
 - ``tags_badge_colors``
-  - Colors to use for badges based on tag name. **Default:** ``{}``
+
+  * Colors to use for badges based on tag name. **Default:** ``{}``
+
 - ``tags_allowed_tag_names_regex``
-  - Define one or multiple regular expressions that each tag name must pass.
+
+  * Define one or multiple regular expressions that each tag name must pass.
     All names are allowed by default. **Default:** ``[]``
+
 - ``tags_minimum_tag_count``
-  - Define a required minimum amount of tags per directive.
+
+  * Define a required minimum amount of tags per directive.
     No minimum is set by default. **Default:** ``-1``
+
 - ``tags_maximum_tag_count``
-  - Define a required maximum amount of tags per directive.
+
+  * Define a required maximum amount of tags per directive.
     No minimum is set by default. **Default:** ``-1``
 
 
