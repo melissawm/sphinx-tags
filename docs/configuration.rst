@@ -29,6 +29,8 @@ A few custom configuration keys can be used in your ``conf.py`` file.
   - Whether to display tags using sphinx-design badges. **Default:** ``False``
 - ``tags_badge_colors``
   - Colors to use for badges based on tag name. **Default:** ``{}``
+- ``tags_single_page``
+  - Generates a single page of all tags used, under separate headings. **Default:** ``False``
 
 
 Tags overview page

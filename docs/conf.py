@@ -44,6 +44,7 @@ tags_intro_text = "Tags in this page:"  # default: "Tags:"
 tags_page_title = "Tag"  # default: "My tags:"
 tags_page_header = "Pages with this tag"  # default: "With this tag"
 tags_index_head = "Tags in this site"  # default: "Tags"
+tags_single_page = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

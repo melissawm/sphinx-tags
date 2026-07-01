@@ -14,6 +14,15 @@ from sphinx_tags import TagLinks
 from test.conftest import OUTPUT_ROOT_DIR
 
 OUTPUT_DIR = OUTPUT_ROOT_DIR / "general"
+SINGLE_PAGE_OUTPUT_DIR = OUTPUT_ROOT_DIR / "general_single_page"
+
+
+def assert_output_matches(build_dir: Path, expected_dir: Path, relative_path: Path):
+    contents = build_dir / relative_path
+    expected_contents = expected_dir / relative_path
+    assert (
+        contents.read_text().splitlines() == expected_contents.read_text().splitlines()
+    )
 
 
 def run_all_formats():
@@ -47,16 +56,10 @@ def test_index(app: SphinxTestApp):
     app.build(force_all=True)
     build_dir = Path(app.srcdir) / "_build" / "text"
     # Check tags index page
-    contents = build_dir / "_tags" / "tagsindex.txt"
-    expected_contents = OUTPUT_DIR / "_tags" / "tagsindex.txt"
-    with open(contents, "r") as actual, open(expected_contents, "r") as expected:
-        assert actual.readlines() == expected.readlines()
+    assert_output_matches(build_dir, OUTPUT_DIR, Path("_tags") / "tagsindex.txt")
 
     # Check full toctree created by index
-    contents = build_dir / "index.txt"
-    expected_contents = OUTPUT_DIR / "index.txt"
-    with open(contents, "r") as actual, open(expected_contents, "r") as expected:
-        assert actual.readlines() == expected.readlines()
+    assert_output_matches(build_dir, OUTPUT_DIR, Path("index.txt"))
 
 
 @pytest.mark.sphinx(confoverrides={"tags_create_tags": True})
@@ -67,10 +70,7 @@ def test_tag_pages(app: SphinxTestApp):
 
     # Check all expected tag pages
     for tag in ["tag_1", "tag2", "tag-3", "tag-4", "tag_5", "test-tag-please-ignore"]:
-        contents = build_dir / "_tags" / f"{tag}.txt"
-        expected_contents = OUTPUT_DIR / "_tags" / f"{tag}.txt"
-        with open(contents, "r") as actual, open(expected_contents, "r") as expected:
-            assert actual.readlines() == expected.readlines()
+        assert_output_matches(build_dir, OUTPUT_DIR, Path("_tags") / f"{tag}.txt")
 
 
 @run_all_formats()
@@ -85,10 +85,19 @@ def test_tagged_pages(app: SphinxTestApp):
         Path("page_5.txt"),
         Path("subdir") / "page_3.txt",
     ]:
-        contents = build_dir / page
-        expected_contents = OUTPUT_DIR / page
-        with open(contents, "r") as actual, open(expected_contents, "r") as expected:
-            assert actual.readlines() == expected.readlines()
+        assert_output_matches(build_dir, OUTPUT_DIR, page)
+
+
+@pytest.mark.sphinx(confoverrides={"tags_create_tags": True, "tags_single_page": True})
+@run_all_formats()
+def test_single_page_index(app: SphinxTestApp):
+    app.build(force_all=True)
+    build_dir = Path(app.srcdir) / "_build" / "text"
+
+    assert_output_matches(
+        build_dir, SINGLE_PAGE_OUTPUT_DIR, Path("_tags") / "tagsindex.txt"
+    )
+    assert_output_matches(build_dir, SINGLE_PAGE_OUTPUT_DIR, Path("index.txt"))
 
 
 def test_empty_taglinks():

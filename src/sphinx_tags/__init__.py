@@ -111,8 +111,13 @@ class TagLinks(SphinxDirective):
 
     def _get_plaintext_node(self, tag: str, file_basename: str) -> List[nodes.Node]:
         """Get a plaintext reference link for the given tag"""
-        link = Path(self.env.app.config.tags_output_dir) / f"{file_basename}/"
-        return nodes.reference(refuri="/" + str(link), text=tag)
+        tags_output_dir = self.env.app.config.tags_output_dir
+        if self.env.app.config.tags_single_page:
+            ref_label = f"sphx_tag_{file_basename}"
+            link = f"/{tags_output_dir}/tagsindex#{ref_label}"
+        else:
+            link = "/" + str(Path(tags_output_dir) / f"{file_basename}/")
+        return nodes.reference(refuri=link, text=tag)
 
     def _get_badge_node(
         self, tag: str, file_basename: str, relative_tag_dir: Path
@@ -125,7 +130,11 @@ class TagLinks(SphinxDirective):
         text_nodes, messages = self.state.inline_text("", self.lineno)
 
         # Ref paths always use forward slashes, even on Windows
-        tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{file_basename}>"
+        if self.env.app.config.tags_single_page:
+            ref_label = f"sphx_tag_{file_basename}"
+            tag_ref = f"{tag} <{ref_label}>"
+        else:
+            tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{file_basename}>"
         tag_color = self._get_tag_color(tag)
         tag_badge = XRefBadgeRole(tag_color)
         return tag_badge(
@@ -359,6 +368,65 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
         f.write("\n".join(content))
 
 
+def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
+    """Creates Tag overview page.
+
+    This page contains headings of all available tags, with a list of pages under each heading.
+
+    """
+
+    tags = list(tags.values())
+
+    if "md" in extension:
+        content = []
+        content.append("---")
+        content.append("orphan: true")
+        content.append("---")
+        content.append("")
+        content.append("(tagoverview)=")
+        content.append("")
+        content.append(f"# {title}")
+        content.append("")
+        # Subheadings and links for each tag
+        for tag in sorted(tags, key=lambda t: t.name):
+            ref_label = f"sphx_tag_{tag.file_basename}"
+            content.append(f"({ref_label})=")
+            content.append(f"## {tag.name}")
+            for items in pages:
+                if tag.name in items.tags:
+                    content.append(
+                        f"- [{items.filepath.stem}]({items.relpath(outdir)})"
+                    )
+            content.append("")
+        filename = os.path.join(outdir, "tagsindex.md")
+    else:
+        content = []
+        content.append(":orphan:")
+        content.append("")
+        content.append(".. _tagoverview:")
+        content.append("")
+        content.append(title)
+        content.append("#" * textwidth(title))
+        content.append("")
+        # Subheadings and links for each tag
+        for tag in sorted(tags, key=lambda t: t.name):
+            ref_label = f"sphx_tag_{tag.file_basename}"
+            content.append(f".. _{ref_label}:")
+            content.append("")
+            content.append(f"{tag.name}")
+            content.append("-" * textwidth(content[-1]))
+            for items in pages:
+                if tag.name in items.tags:
+                    content.append(
+                        f"- `{items.filepath.stem} <{items.relpath(outdir)}>`_"
+                    )
+        content.append("")
+        filename = os.path.join(outdir, "tagsindex.rst")
+
+    with open(filename, "w", encoding="utf8") as f:
+        f.write("\n".join(content))
+
+
 def assign_entries(app):
     """Assign all found entries to their tag."""
     pages = []
@@ -391,28 +459,47 @@ def update_tags(app):
             if file.endswith("md") or file.endswith("rst"):
                 os.remove(os.path.join(app.srcdir, tags_output_dir, file))
 
-        # Create pages for each tag
-        tags, pages = assign_entries(app)
+        if not app.config.tags_single_page:
+            # Create pages for each tag
+            tags, pages = assign_entries(app)
 
-        for tag in tags.values():
-            tag.create_file(
-                [item for item in pages if tag.name in item.tags],
+            for tag in tags.values():
+                tag.create_file(
+                    [item for item in pages if tag.name in item.tags],
+                    app.config.tags_extension,
+                    tags_output_dir,
+                    app.srcdir,
+                    app.config.tags_page_title,
+                    app.config.tags_page_header,
+                )
+
+            # Create tags overview page
+            tagpage(
+                tags,
+                os.path.join(app.srcdir, tags_output_dir),
+                app.config.tags_overview_title,
                 app.config.tags_extension,
-                tags_output_dir,
-                app.srcdir,
-                app.config.tags_page_title,
-                app.config.tags_page_header,
+                app.config.tags_index_head,
             )
+            logger.info("Tags updated", color="white")
 
-        # Create tags overview page
-        tagpage(
-            tags,
-            os.path.join(app.srcdir, tags_output_dir),
-            app.config.tags_overview_title,
-            app.config.tags_extension,
-            app.config.tags_index_head,
-        )
-        logger.info("Tags updated", color="white")
+        else:
+
+            # Create a page with all tags
+            tags, pages = assign_entries(app)
+
+            # TODO: Rework to create a single page
+
+            tag_single_page(
+                tags,
+                pages,
+                os.path.join(app.srcdir, tags_output_dir),
+                app.config.tags_overview_title,
+                app.config.tags_extension,
+                app.config.tags_index_head,
+            )
+            logger.info("Tags updated", color="white")
+
     else:
         logger.info(
             "Tags were not created (tags_create_tags=False in conf.py)", color="white"
@@ -435,6 +522,7 @@ def setup(app):
     app.add_config_value("tags_index_head", "Tags", "html")
     app.add_config_value("tags_create_badges", False, "html")
     app.add_config_value("tags_badge_colors", {}, "html")
+    app.add_config_value("tags_single_page", False, "html")
 
     # internal config values
     app.add_config_value(

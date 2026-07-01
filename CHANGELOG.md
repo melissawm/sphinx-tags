@@ -39,3 +39,4 @@
 
 - Added support for tags in directive body
 - Added ref label to tag pages, in the format `sphx_tag_<tagname>`
+- Added support for single page tag output
