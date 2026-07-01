@@ -73,6 +73,9 @@ class TagLinks(SphinxDirective):
         # (can happen after _normalize_tag())
         page_tags = list(filter(None, page_tags))
 
+        # validate if tags meet the requirements set by config
+        self.validate(page_tags)
+
         tag_dir = Path(self.env.app.srcdir) / self.env.app.config.tags_output_dir
         result = nodes.paragraph()
         result["classes"] = ["tags"]
@@ -108,6 +111,38 @@ class TagLinks(SphinxDirective):
         self.env.metadata[self.env.docname]["tags"] = page_tags
 
         return [result]
+
+    def validate(self, page_tags):
+        """Validate each tag against the allowed tag names and tag count constraints."""
+
+        tags_allowed_tag_names_regex = self.env.app.config.tags_allowed_tag_names_regex
+        minimum_tag_count = self.env.app.config.tags_minimum_tag_count
+        maximum_tag_count = self.env.app.config.tags_maximum_tag_count
+
+        logger.verbose(
+            f"Validating tags {page_tags} with constraints: regex {tags_allowed_tag_names_regex}, min {minimum_tag_count}, max {maximum_tag_count}"
+        )
+        count = len(page_tags)
+
+        if minimum_tag_count >= 0 and count < minimum_tag_count:
+            raise ExtensionError(
+                f"Minimum tag count of {minimum_tag_count} not met for tags {page_tags} (count: {count})."
+            )
+
+        if 0 <= maximum_tag_count < count:
+            raise ExtensionError(
+                f"Maximum tag count of {maximum_tag_count} exceeded for tags {page_tags} (count: {count})."
+            )
+
+        if tags_allowed_tag_names_regex:
+            for tag in page_tags:
+                if not any(
+                    re.fullmatch(pattern, tag)
+                    for pattern in tags_allowed_tag_names_regex
+                ):
+                    raise ExtensionError(
+                        f"Tag '{tag}' is not in the list of allowed tag names."
+                    )
 
     def _get_plaintext_node(self, tag: str, file_basename: str) -> List[nodes.Node]:
         """Get a plaintext reference link for the given tag"""
@@ -435,6 +470,9 @@ def setup(app):
     app.add_config_value("tags_index_head", "Tags", "html")
     app.add_config_value("tags_create_badges", False, "html")
     app.add_config_value("tags_badge_colors", {}, "html")
+    app.add_config_value("tags_allowed_tag_names_regex", [], "html")
+    app.add_config_value("tags_minimum_tag_count", -1, "html")
+    app.add_config_value("tags_maximum_tag_count", -1, "html")
 
     # internal config values
     app.add_config_value(

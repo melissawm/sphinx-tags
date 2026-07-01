@@ -18,13 +18,13 @@ EXPECTED_CLASSES = {
 
 
 @pytest.mark.sphinx("html", testroot="badges")
-def test_build(app: SphinxTestApp, status: StringIO, warning: StringIO):
+def test_build(app: SphinxTestApp, status: StringIO):
     app.build()
     assert "build succeeded" in status.getvalue()
 
 
 @pytest.mark.sphinx("html", testroot="badges")
-def test_badges(app: SphinxTestApp, status: StringIO, warning: StringIO):
+def test_badges(app: SphinxTestApp, status: StringIO):
     """Parse output HTML for a page with badges, find badge links, and check for CSS classes for
     expected badge colors
     """
