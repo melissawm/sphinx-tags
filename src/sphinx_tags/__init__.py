@@ -166,8 +166,7 @@ class Tag:
         tags_page_title,
         tags_page_header,
     ):
-        """Create file with list of documents associated with a given tag in
-        toctree format.
+        """Create file with list of documents associated with a given tag using the :doc: reference.
 
         This file is reached as a link from the tag name in each documentation
         file, or from the tag overview page.
@@ -204,14 +203,12 @@ class Tag:
             content.append(f"({ref_label})=")
             content.append(f"# {tags_page_title}: {self.name}")
             content.append("")
-            content.append("```{toctree}")
-            content.append("---")
-            content.append("maxdepth: 1")
-            content.append(f"caption: {tags_page_header}")
-            content.append("---")
+            content.append(f"{tags_page_header}")
+            content.append("")
             for path in tag_page_paths:
-                content.append(f"../{path}")
-            content.append("```")
+                content.append(
+                    f"- {{doc}}`/{path.as_posix().removesuffix(path.suffix)}`"
+                )
         else:
             filename = f"{self.file_basename}.rst"
             header = f"{tags_page_title}: {self.name}"
@@ -220,12 +217,10 @@ class Tag:
             content.append(header)
             content.append("#" * textwidth(header))
             content.append("")
-            content.append(".. toctree::")
-            content.append("    :maxdepth: 1")
-            content.append(f"    :caption: {tags_page_header}")
+            content.append(f"{tags_page_header}")
             content.append("")
             for path in tag_page_paths:
-                content.append(f"    ../{path}")
+                content.append(f"- :doc:`/{path.as_posix().removesuffix(path.suffix)}`")
 
         content.append("")
         with open(
@@ -285,9 +280,9 @@ class Entry:
                 tag_dict[tag] = Tag(tag)
             tag_dict[tag].items.append(self)
 
-    def relpath(self, root_dir) -> str:
+    def relpath(self, root_dir) -> Path:
         """Get this entry's path relative to the given root directory"""
-        return Path(os.path.relpath(self.filepath, root_dir)).as_posix()
+        return Path(os.path.relpath(self.filepath, root_dir))
 
 
 def _normalize_tag(tag: str, dashes: bool = False) -> str:
