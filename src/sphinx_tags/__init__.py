@@ -18,6 +18,21 @@ __version__ = "0.4"
 logger = getLogger("sphinx-tags")
 
 
+def _update_file_content(filepath: Path, content: str) -> None:
+    """Update content of file only if it has changed"""
+
+    if os.path.exists(filepath):
+        with open(filepath, "r", encoding="utf8") as f:
+            old_content = f.read()
+            if old_content == content:
+                # File is already up to date
+                return
+
+    # Override content
+    with open(filepath, "w", encoding="utf8") as f:
+        f.write(content)
+
+
 class TagLinks(SphinxDirective):
     """Custom directive for adding tags to Sphinx-generated files.
 
@@ -256,10 +271,10 @@ class Tag:
                 content.append(f"- :doc:`/{path.as_posix().removesuffix(path.suffix)}`")
 
         content.append("")
-        with open(
-            os.path.join(srcdir, tags_output_dir, filename), "w", encoding="utf8"
-        ) as f:
-            f.write("\n".join(content))
+
+        _update_file_content(
+            Path(srcdir) / tags_output_dir / filename, "\n".join(content)
+        )
 
 
 class Entry:
@@ -368,7 +383,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
             content.append(f"{tag.name} ({len(tag.items)}) <{tag.file_basename}>")
         content.append("```")
         content.append("")
-        filename = os.path.join(outdir, "tagsindex.md")
+        filename = Path(outdir) / "tagsindex.md"
     else:
         content = []
         content.append(":orphan:")
@@ -388,10 +403,9 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
                 f"    {tag.name} ({len(tag.items)}) <{tag.file_basename}.rst>"
             )
         content.append("")
-        filename = os.path.join(outdir, "tagsindex.rst")
+        filename = Path(outdir) / "tagsindex.rst"
 
-    with open(filename, "w", encoding="utf8") as f:
-        f.write("\n".join(content))
+    _update_file_content(filename, "\n".join(content))
 
 
 def assign_entries(app):
@@ -422,12 +436,23 @@ def update_tags(app):
         if not os.path.exists(os.path.join(app.srcdir, tags_output_dir)):
             os.makedirs(os.path.join(app.srcdir, tags_output_dir))
 
-        for file in os.listdir(os.path.join(app.srcdir, tags_output_dir)):
-            if file.endswith("md") or file.endswith("rst"):
-                os.remove(os.path.join(app.srcdir, tags_output_dir, file))
-
         # Create pages for each tag
         tags, pages = assign_entries(app)
+
+        # Build list of files to not delete
+        expected_files = set()
+        for extension in app.config.tags_extension:
+            # Add all tags
+            expected_files.update(
+                [f"{tag.file_basename}.{extension}" for tag in tags.values()]
+            )
+            # Add tagsindex file
+            expected_files.add(f"tagsindex.{extension}")
+
+        # Remove all files not expected
+        for file in os.listdir(os.path.join(app.srcdir, tags_output_dir)):
+            if file not in expected_files:
+                os.remove(os.path.join(app.srcdir, tags_output_dir, file))
 
         for tag in tags.values():
             tag.create_file(
